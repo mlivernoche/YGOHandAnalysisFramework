@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YGOHandAnalysisFramework", "YGOHandAnalysisFramework\YGOHandAnalysisFramework.csproj", "{F83C761C-9FDC-4C82-996C-5F2D5889EBE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardSourceGenerator", "CardSourceGenerator\CardSourceGenerator.csproj", "{67CD7C00-91EF-4FE6-B136-4050EC32AFF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F83C761C-9FDC-4C82-996C-5F2D5889EBE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F83C761C-9FDC-4C82-996C-5F2D5889EBE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F83C761C-9FDC-4C82-996C-5F2D5889EBE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F83C761C-9FDC-4C82-996C-5F2D5889EBE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67CD7C00-91EF-4FE6-B136-4050EC32AFF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CD7C00-91EF-4FE6-B136-4050EC32AFF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CD7C00-91EF-4FE6-B136-4050EC32AFF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CD7C00-91EF-4FE6-B136-4050EC32AFF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44EE0A0C-07BD-4A15-822D-36B59F0ECEBA}
+	EndGlobalSection
+EndGlobal

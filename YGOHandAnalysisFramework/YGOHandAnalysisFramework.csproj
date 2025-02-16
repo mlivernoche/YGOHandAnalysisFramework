@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Features\Comparison\Formatting\HandAnalyzerComparisonCategoryResults.cs" />
+	  <Compile Remove="Features\Comparison\Formatting\HandAnalyzerComparisonCategoryResultsRanked.cs" />
+	  <Compile Remove="Features\Comparison\Formatting\HandAnalyzerComparisonFormatter.cs" />
+	  <Compile Remove="Features\Comparison\Formatting\IHandAnalyzerComparisonCategoryResults.cs" />
+	  <Compile Remove="Features\Comparison\HandAnalyzerComparison.cs" />
+	  <Compile Remove="Features\Comparison\HandAnalyzerComparisonCategory.cs" />
+	  <Compile Remove="Features\Comparison\HandAnalyzerComparisonCategoryBase.cs" />
+	  <Compile Remove="Features\Comparison\HandAnalyzerComparisonCategoryRanked.cs" />
+	  <Compile Remove="Features\Comparison\IHandAnalyzerComparisonCategory.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
+		<PackageReference Include="System.Text.Json" Version="9.0.2" />
+		<PackageReference Include="System.IO.Pipelines" Version="9.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\CardSourceGenerator\CardSourceGenerator.csproj" />
+	</ItemGroup>
+
+</Project>

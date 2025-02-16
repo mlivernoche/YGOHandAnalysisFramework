@@ -1,0 +1,5 @@
+﻿using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+
+namespace YGOHandAnalysisFramework.Features.Comparison;
+
+public delegate IDataComparisonFormatter CreateDataComparisonFormat(IEnumerable<IDataComparisonFormatterEntry> handAnalyzers, IEnumerable<IDataComparisonCategoryResults> categoryResults);
