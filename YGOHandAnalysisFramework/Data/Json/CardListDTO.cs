@@ -38,16 +38,16 @@ public sealed class CardListDTO
         return new CardListDTO(cards);
     }
 
-    public static CardList<ICardGroup<TCardGroupName>, TCardGroupName> Create<TCardGroupName>(CardListDTO cardList, Func<string, TCardGroupName> nameConverter)
+    public static CardList<CardGroup<TCardGroupName>, TCardGroupName> Create<TCardGroupName>(CardListDTO cardList, Func<string, TCardGroupName> nameConverter)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var cards = new List<ICardGroup<TCardGroupName>>();
+        var cards = new CardGroupCollection<CardGroup<TCardGroupName>, TCardGroupName>();
 
         foreach (var card in cardList.Cards)
         {
-            cards.Add(CardGroupDTO.Create(card, nameConverter));
+            cards = cards.Add(CardGroupDTO.Create(card, nameConverter));
         }
 
-        return CardList.Create<ICardGroup<TCardGroupName>, TCardGroupName>(cards);
+        return CardList.Create(cards);
     }
 }

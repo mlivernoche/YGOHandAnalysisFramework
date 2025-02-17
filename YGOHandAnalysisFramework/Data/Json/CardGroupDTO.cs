@@ -19,7 +19,7 @@ public sealed class CardGroupDTO
         };
     }
 
-    public static ICardGroup<TCardGroupName> Create<TCardGroupName>(CardGroupDTO cardGroup, Func<string, TCardGroupName> nameConverter)
+    public static CardGroup<TCardGroupName> Create<TCardGroupName>(CardGroupDTO cardGroup, Func<string, TCardGroupName> nameConverter)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         return new CardGroup<TCardGroupName>()

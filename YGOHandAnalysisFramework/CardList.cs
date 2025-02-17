@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using CommunityToolkit.Diagnostics;
 using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Features.Analysis;
@@ -14,6 +15,14 @@ public static class CardList
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         return new CardList<TCardGroup, TCardGroupName>([]);
+    }
+
+    [Pure]
+    public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(CardGroupCollection<TCardGroup, TCardGroupName> cardGroups)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new CardList<TCardGroup, TCardGroupName>(cardGroups);
     }
 
     public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cards)
