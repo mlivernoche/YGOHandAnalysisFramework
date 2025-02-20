@@ -18,7 +18,7 @@ public static class CardGroupCollection
     }
 }
 
-public class CardGroupCollection<TCardGroup, TCardGroupName> : IReadOnlyCollection<TCardGroup>
+public class CardGroupCollection<TCardGroup, TCardGroupName> : ICardGroupCollection<TCardGroup, TCardGroupName>
     where TCardGroup : ICardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {

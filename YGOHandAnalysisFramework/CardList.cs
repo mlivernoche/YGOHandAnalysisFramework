@@ -19,7 +19,7 @@ public static class CardList
     }
 
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(CardGroupCollection<TCardGroup, TCardGroupName> cardGroups)
+    public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(ICardGroupCollection<TCardGroup, TCardGroupName> cardGroups)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -176,7 +176,7 @@ public static class CardList
     }
 }
 
-public class CardList<TCardGroup, TCardGroupName> : IReadOnlyCollection<TCardGroup>
+public class CardList<TCardGroup, TCardGroupName> : ICardGroupCollection<TCardGroup, TCardGroupName>
     where TCardGroup : ICardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
@@ -258,12 +258,12 @@ public class CardList<TCardGroup, TCardGroupName> : IReadOnlyCollection<TCardGro
 
     public int Count => Cards.Count;
 
-    public IReadOnlyCollection<TCardGroupName> Names { get; }
+    public IEnumerable<TCardGroupName> CardNames { get; }
 
     public CardList(IEnumerable<TCardGroup> cards)
     {
         Cards = new HashSet<TCardGroup>(cards.Where(static group => group.Size > 0), Comparer.Instance);
-        Names = Cards.Select(static group => group.Name).ToList();
+        CardNames = Cards.Select(static group => group.Name).ToList();
     }
 
     [Pure]
