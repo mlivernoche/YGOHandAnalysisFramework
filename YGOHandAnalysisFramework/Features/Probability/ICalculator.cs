@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YGOHandAnalysisFramework.Data;
-using YGOHandAnalysisFramework.Features.Analysis;
-using YGOHandAnalysisFramework.Features.Combinations;
-
-namespace YGOHandAnalysisFramework.Features.Probability;
+﻿namespace YGOHandAnalysisFramework.Features.Probability;
 
 public interface ICalculator<T>
 {
