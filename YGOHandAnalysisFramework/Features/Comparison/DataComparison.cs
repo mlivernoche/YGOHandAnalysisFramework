@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.Comparison;
 
@@ -64,6 +65,14 @@ public static class DataComparison
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TReturn>(name, formatter, func);
+        return new DataComparison<TComparison>(comparison, category);
+    }
+
+    [Pure]
+    public static DataComparison<TComparison> AddCategoryWithWrappedValue<TComparison, TWrapped>(this DataComparison<TComparison> comparison, string name, IFormat<double> formatter, Func<TWrapped, double> func)
+        where TComparison : ICalculator<TWrapped>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategory<TComparison, double>(name, formatter, calculator => calculator.Calculate(func));
         return new DataComparison<TComparison>(comparison, category);
     }
 
