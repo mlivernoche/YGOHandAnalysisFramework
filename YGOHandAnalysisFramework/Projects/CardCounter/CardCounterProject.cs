@@ -62,16 +62,16 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.Add($"Count={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, HasThisNumberOfCards));
+            comparison = comparison.AddCategory($"Count={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, HasThisNumberOfCards));
         }
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.Add($"Count>={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, num) => handAnalyzer.CalculateProbability(num, HasAtLeastThisNumberOfCards));
+            comparison = comparison.AddCategory($"Count>={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, num) => handAnalyzer.CalculateProbability(num, HasAtLeastThisNumberOfCards));
         }
 
         var results = comparison
-            .Add("E(HT)", numericalFormatter, new Context(0, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateExpectedValue(context, CountCards))
+            .AddCategory("E(HT)", numericalFormatter, new Context(0, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateExpectedValue(context, CountCards))
             .RunInParallel(DataComparisonFormatFactory);
         outputStream.Write(results.FormatResults());
     }

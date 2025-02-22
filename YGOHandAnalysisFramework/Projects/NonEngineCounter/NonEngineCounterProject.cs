@@ -43,7 +43,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
 
         var results = DataComparison
             .Create(optimizedAnalyzers)
-            .Add(Enumerable.Range(0, maxNumberOfNonEngine).Select(static number =>
+            .AddCategories(Enumerable.Range(0, maxNumberOfNonEngine).Select(static number =>
             {
                 var name = $"HT={number:N0}";
                 var format = PercentFormat<double>.Default;
@@ -52,7 +52,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
                 var category = new DataComparisonCategory<HandAnalyzer<TCardGroup, TCardGroupName>, int, double>(name, format, context, static (handAnalyzer, num) => handAnalyzer.CalculateProbability(num, HasThisNumberOfNonEngine));
                 return category;
             }))
-            .Add(Enumerable.Range(0, maxNumberOfNonEngine).Select(static number =>
+            .AddCategories(Enumerable.Range(0, maxNumberOfNonEngine).Select(static number =>
             {
                 var name = $"HT>={number:N0}";
                 var format = PercentFormat<double>.Default;
@@ -61,7 +61,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
                 var category = new DataComparisonCategory<HandAnalyzer<TCardGroup, TCardGroupName>, int, double>(name, format, context, static (handAnalyzer, num) => handAnalyzer.CalculateProbability(num, HasAtLeastThisNumberOfNonEngine));
                 return category;
             }))
-            .Add($"E(HT)", numericalFormatter, static handAnalyzer => handAnalyzer.CalculateExpectedValue(static (analyzer, hand) =>
+            .AddCategory($"E(HT)", numericalFormatter, static handAnalyzer => handAnalyzer.CalculateExpectedValue(static (analyzer, hand) =>
             {
                 var total = 0;
 
@@ -76,7 +76,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
                 return total;
             }),
             HandAnalyzerComparison.GetDescendingComparer<double>())
-            .Add($"N(HT)", numericalFormatter, static handAnalyzer => handAnalyzer.CardGroups.Values.Where(static group => group.IsNonEngine).Sum(static group => group.Size))
+            .AddCategory($"N(HT)", numericalFormatter, static handAnalyzer => handAnalyzer.CardGroups.Values.Where(static group => group.IsNonEngine).Sum(static group => group.Size))
             .RunInParallel(DataComparisonFormatFactory);
         outputStream.Write(results.FormatResults());
     }

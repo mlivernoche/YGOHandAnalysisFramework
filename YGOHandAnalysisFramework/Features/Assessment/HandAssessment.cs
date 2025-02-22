@@ -1,4 +1,5 @@
-﻿using YGOHandAnalysisFramework.Data;
+﻿using System.Diagnostics.Contracts;
+using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
@@ -8,6 +9,7 @@ namespace YGOHandAnalysisFramework.Features.Assessment;
 
 public static class HandAssessment
 {
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
@@ -19,9 +21,10 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var category = new HandAssessmentComparisonCategory<TCardGroup, TCardGroupName, TReturn, TAssessment>(categoryName, formatter, assessmentFactory, func, new());
-        return comparison.Add(category);
+        return comparison.AddCategory(category);
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
@@ -34,9 +37,10 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var category = new HandAssessmentComparisonCategory<TCardGroup, TCardGroupName, TReturn, TAssessment>(categoryName, formatter, assessmentFactory, func, new(), optimizer);
-        return comparison.Add(category);
+        return comparison.AddCategory(category);
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
@@ -48,9 +52,10 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var category = new HandAssessmentComparisonCategory<TCardGroup, TCardGroupName, double, TAssessment>(categoryName, formatter, assessmentFactory, analyzer => analyzer.CalculateProbability(predicate), new());
-        return comparison.Add(category);
+        return comparison.AddCategory(category);
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<TReturn> formatter,
@@ -65,12 +70,13 @@ public static class HandAssessment
         foreach (var (Name, Method) in func)
         {
             var category = new HandAssessmentComparisonCategory<TCardGroup, TCardGroupName, TReturn, TAssessment>(Name, formatter, assessmentFactory, Method, cache);
-            comparison = comparison.Add(category);
+            comparison = comparison.AddCategory(category);
         }
 
         return comparison;
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<double> formatter,
@@ -85,12 +91,13 @@ public static class HandAssessment
         foreach (var calculator in func)
         {
             var category = new HandAssessmentComparisonCategory<TCardGroup, TCardGroupName, double, TAssessment>(calculator.Name, formatter, assessmentFactory, analyzer => analyzer.CalculateProbability(calculator.Predicate), cache);
-            comparison = comparison.Add(category);
+            comparison = comparison.AddCategory(category);
         }
 
         return comparison;
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
@@ -102,9 +109,10 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var category = new HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, TCardGroupName, TReturn, TAssessment>(categoryName, formatter, assessmentFactory, func, new());
-        return comparison.Add(category);
+        return comparison.AddCategory(category);
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
@@ -116,9 +124,10 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var category = new HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, TCardGroupName, double, TAssessment>(categoryName, formatter, assessmentFactory, analyzer => analyzer.CalculateProbability(predicate), new());
-        return comparison.Add(category);
+        return comparison.AddCategory(category);
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<TReturn> formatter,
@@ -133,12 +142,13 @@ public static class HandAssessment
         foreach (var (Name, Method) in func)
         {
             var category = new HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, TCardGroupName, TReturn, TAssessment>(Name, formatter, assessmentFactory, Method, cache);
-            comparison = comparison.Add(category);
+            comparison = comparison.AddCategory(category);
         }
 
         return comparison;
     }
 
+    [Pure]
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<double> formatter,
@@ -153,7 +163,7 @@ public static class HandAssessment
         foreach (var calculator in func)
         {
             var category = new HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, TCardGroupName, double, TAssessment>(calculator.Name, formatter, assessmentFactory, analyzer => analyzer.CalculateProbability(calculator.Predicate), cache);
-            comparison = comparison.Add(category);
+            comparison = comparison.AddCategory(category);
         }
 
         return comparison;

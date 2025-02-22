@@ -31,19 +31,19 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison>(this DataComparison<TComparison> comparison, IEnumerable<IDataComparisonCategory<TComparison>> categories)
+    public static DataComparison<TComparison> AddCategories<TComparison>(this DataComparison<TComparison> comparison, IEnumerable<IDataComparisonCategory<TComparison>> categories)
         where TComparison : IDataComparisonFormatterEntry
     {
         foreach(var category in categories)
         {
-            comparison = comparison.Add(category);
+            comparison = comparison.AddCategory(category);
         }
 
         return comparison;
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison>(this DataComparison<TComparison> comparison, IDataComparisonCategory<TComparison> category)
+    public static DataComparison<TComparison> AddCategory<TComparison>(this DataComparison<TComparison> comparison, IDataComparisonCategory<TComparison> category)
         where TComparison : IDataComparisonFormatterEntry
     {
         return new DataComparison<TComparison>(comparison, category);
@@ -61,7 +61,7 @@ public static class DataComparison
     /// <param name="func">The calculator of <c>TReturn</c> value, which will be applied to each <c>TComparison</c>.</param>
     /// <returns>The <c>HandAnalyzerComparison</c> provided.</returns>
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func)
+    public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TReturn>(name, formatter, func);
@@ -88,7 +88,7 @@ public static class DataComparison
     /// <param name="optimizer">This can take a <c>HandAnalyzer</c> can transform it into a version that is more optimized for the <c>func</c>. Typically, this means it will have less <c>CardGroup</c>s, which means less <c>HandCombination</c> objects to enumerate over.</param>
     /// <returns>The <c>HandAnalyzerComparison</c> provided.</returns>
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, Func<TComparison, TComparison> optimizer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TReturn>(name, formatter, func, optimizer);
@@ -96,7 +96,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, IComparer<TReturn> comparer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, IComparer<TReturn> comparer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategoryRanked<TComparison, TReturn>(name, formatter, func, comparer);
@@ -104,7 +104,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategoryRanked<TComparison, TReturn>(name, formatter, func, comparer, optimizer);
@@ -112,7 +112,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func)
+    public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TArgs, TReturn>(name, formatter, args, func);
@@ -120,7 +120,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, Func<TComparison, TComparison> optimizer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TArgs, TReturn>(name, formatter, args, func, optimizer);
@@ -128,7 +128,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, IComparer<TReturn> comparer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, IComparer<TReturn> comparer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategoryRanked<TComparison, TArgs, TReturn>(name, formatter, args, func, comparer);
@@ -136,7 +136,7 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> Add<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
+    public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategoryRanked<TComparison, TArgs, TReturn>(name, formatter, args, func, comparer, optimizer);

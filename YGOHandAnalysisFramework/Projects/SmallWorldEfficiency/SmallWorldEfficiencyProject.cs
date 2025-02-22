@@ -43,7 +43,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
 
         var comparison = DataComparison
             .Create(HandAnalyzers)
-            .Add("Hand Has No Search Targets", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, static (args, hand) =>
+            .AddCategory("Hand Has No Search Targets", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, static (args, hand) =>
             {
                 if (!hand.HasThisCard(args.SmallWorldName))
                 {
@@ -65,10 +65,10 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
 
                 return numberOfSearchTargets == foundSearchTargets;
             }))
-            .Add("Hand Has Small World", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, HasSmallWorld))
-            .Add("Small World Can Find A Target", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCard))
-            .Add("Small World Can Find A Target (Net)", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCardNet))
-            .Add("Small World Efficiency", PercentFormat<double>.Default, context, static (analyzer, args) =>
+            .AddCategory("Hand Has Small World", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, HasSmallWorld))
+            .AddCategory("Small World Can Find A Target", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCard))
+            .AddCategory("Small World Can Find A Target (Net)", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCardNet))
+            .AddCategory("Small World Efficiency", PercentFormat<double>.Default, context, static (analyzer, args) =>
             {
                 var hasCard = analyzer.CalculateProbability(args, HasSmallWorld);
                 var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCard);
@@ -80,7 +80,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
 
                 return canFind / hasCard;
             })
-            .Add("Small World Efficiency (Net)", PercentFormat<double>.Default, context, static (analyzer, args) =>
+            .AddCategory("Small World Efficiency (Net)", PercentFormat<double>.Default, context, static (analyzer, args) =>
             {
                 var hasCard = analyzer.CalculateProbability(args, HasSmallWorld);
                 var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCardNet);

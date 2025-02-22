@@ -40,14 +40,14 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         {
             var comparison = DataComparison
                 .Create(HandAnalyzers)
-                .Add($"P(Banish={banishNumber:N0})", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateProbability)
-                .Add($"Banish={banishNumber:N0} Hit %", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateHitPercentage)
-                .Add($"EV(Banish={banishNumber:N0})", numericalFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateExpectedValue);
+                .AddCategory($"P(Banish={banishNumber:N0})", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateProbability)
+                .AddCategory($"Banish={banishNumber:N0} Hit %", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateHitPercentage)
+                .AddCategory($"EV(Banish={banishNumber:N0})", numericalFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateExpectedValue);
 
             for(int i = 0; i <= banishNumber; i++)
             {
                 var context = new Context(ProsperityName, MiscName, banishNumber);
-                comparison = comparison.Add($"P(Find={i:N0})", probabilityFormatter, (context, i), static (analyzer, context) => CalculateCertainAmountProb(analyzer, context.context, context.i));
+                comparison = comparison.AddCategory($"P(Find={i:N0})", probabilityFormatter, (context, i), static (analyzer, context) => CalculateCertainAmountProb(analyzer, context.context, context.i));
             }
 
             var results = comparison.RunInParallel(DataComparisonFormatFactory);
@@ -56,7 +56,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
 
         var comparison = DataComparison
             .Create(HandAnalyzers)
-            .Add("Drawn Prosperity", probabilityFormatter, new Context(ProsperityName, MiscName, 3), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, static (context, hand) => hand.HasThisCard(context.ProsperityName)))
+            .AddCategory("Drawn Prosperity", probabilityFormatter, new Context(ProsperityName, MiscName, 3), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, static (context, hand) => hand.HasThisCard(context.ProsperityName)))
             .Run(DataComparisonFormatFactory);
         outputStream.Write(comparison.FormatResults());
 
