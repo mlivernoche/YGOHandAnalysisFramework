@@ -1,4 +1,4 @@
-﻿using YGOHandAnalysisFramework.Features.Comparison;
+﻿using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.WeightedProbability;

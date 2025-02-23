@@ -7,7 +7,7 @@ using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Probability;
 using YGOHandAnalysisFramework.Features.Assessment;
 using YGOHandAnalysisFramework.Features.Caching;
-using YGOHandAnalysisFramework.Features.Comparison;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 namespace YGOHandAnalysisFramework.Features.Analysis;
 

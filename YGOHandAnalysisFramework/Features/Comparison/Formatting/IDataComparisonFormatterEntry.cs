@@ -1,4 +1,4 @@
-﻿namespace YGOHandAnalysisFramework.Features.Comparison;
+﻿namespace YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 public interface IDataComparisonFormatterEntry
 {
