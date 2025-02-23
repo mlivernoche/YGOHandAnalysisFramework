@@ -3,6 +3,14 @@ using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.WeightedProbability;
 
+public static class WeightedProbabilityCollection
+{
+    public static WeightedProbabilityCollection<TWeighted> CreateWithEqualWeights<TWeighted>(string name, IEnumerable<TWeighted> weighteds)
+    {
+        return new WeightedProbabilityCollection<TWeighted>(name, weighteds.Select(static weighted => new WeightedData<TWeighted>(1.0, weighted)));
+    }
+}
+
 public record WeightedProbabilityCollection<TWeighted> : IDataComparisonFormatterEntry, ICalculator<TWeighted>
 {
     private string Name { get; }
