@@ -16,7 +16,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private IReadOnlySet<TCardGroupName> CardsToCount { get; }
     private Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> MiscFactory { get; }
-    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
+    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     private record Context(int CardsToCount, IReadOnlySet<TCardGroupName> CardNames);
 
@@ -27,7 +27,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         IEnumerable<TCardGroupName> cardsToCount,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        IDataComparisonFormatterFactory dataComparisonFormatFactory)
+        CreateDataComparisonFormatter dataComparisonFormatFactory)
     {
         ProjectName = projectName ?? nameof(CardCounter);
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
@@ -41,7 +41,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         IEnumerable<TCardGroup> cardsToCount,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        IDataComparisonFormatterFactory dataComparisonFormatFactory)
+        CreateDataComparisonFormatter dataComparisonFormatFactory)
         : this(
               projectName,
               handAnalyzers,

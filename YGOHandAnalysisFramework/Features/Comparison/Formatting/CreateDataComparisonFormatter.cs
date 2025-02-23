@@ -1,0 +1,3 @@
+﻿namespace YGOHandAnalysisFramework.Features.Comparison.Formatting;
+
+public delegate IDataComparisonFormatter CreateDataComparisonFormatter(IEnumerable<IDataComparisonFormatterEntry> entries, IEnumerable<IDataComparisonCategoryResults> results);

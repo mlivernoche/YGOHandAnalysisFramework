@@ -19,7 +19,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
     private TCardGroupName SmallWorldName { get; }
     private TCardGroupName MiscName { get; }
     private HashSet<TCardGroupName> SearchTargets { get; }
-    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
+    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(SmallWorldEfficiencyProject<TCardGroup, TCardGroupName>);
 
@@ -28,7 +28,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
         TCardGroupName smallWorldName,
         TCardGroupName miscName,
         IEnumerable<TCardGroupName> targets,
-        IDataComparisonFormatterFactory dataComparisonFormatFactory)
+        CreateDataComparisonFormatter dataComparisonFormatFactory)
     {
         HandAnalyzers = new(handAnalyzers);
         SmallWorldName = smallWorldName;

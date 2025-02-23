@@ -16,7 +16,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private TCardGroupName ProsperityName { get; }
     private TCardGroupName MiscName { get; }
-    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
+    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(ProsperityProject<TCardGroup, TCardGroupName>);
 
@@ -24,7 +24,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         TCardGroupName prosperityName,
         TCardGroupName miscName,
-        IDataComparisonFormatterFactory dataComparisonFormatFactory)
+        CreateDataComparisonFormatter dataComparisonFormatFactory)
     {
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
         ProsperityName = prosperityName;

@@ -14,14 +14,14 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
 {
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> MiscFactory { get; }
-    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
+    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(NonEngineCounterProject<TCardGroup, TCardGroupName>);
 
     public NonEngineCounterProject(
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        IDataComparisonFormatterFactory createDataComparisonFormat)
+        CreateDataComparisonFormatter createDataComparisonFormat)
     {
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
         MiscFactory = miscFactory;
