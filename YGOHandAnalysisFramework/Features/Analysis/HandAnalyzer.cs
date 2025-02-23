@@ -35,12 +35,12 @@ public static class HandAnalyzer
         return handAnalyzer;
     }
 
-    public static IReadOnlyCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
+    public static IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var hardLoads = new List<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>>();
-        var analyzers = new List<HandAnalyzer<TCardGroup, TCardGroupName>>();
+        var analyzers = new Dictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer <TCardGroup, TCardGroupName>>();
 
         foreach (var args in buildArguments)
         {
@@ -50,43 +50,40 @@ public static class HandAnalyzer
                 continue;
             }
 
-            analyzers.Add(loadedAnalyzer);
+            analyzers[args] = loadedAnalyzer;
         }
 
         var hardLoadedAnalyzers = CreateInParallel(hardLoads);
-        analyzers.AddRange(hardLoadedAnalyzers);
-        loader.CreateCache(hardLoadedAnalyzers);
+
+        foreach(var (args, analyzer) in hardLoadedAnalyzers)
+        {
+            analyzers[args] = analyzer;
+            loader.CreateCache(analyzer);
+        }
 
         return analyzers;
     }
 
-    public static IReadOnlyCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments)
+    public static IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var list = new List<(int, HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>)>();
+        var analyzers = new ConcurrentBag<(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>)>();
 
+        Parallel.ForEach(buildArguments, buildArgument =>
         {
-            int sortId = 0;
-            foreach (var buildArgument in buildArguments)
-            {
-                list.Add((sortId++, buildArgument));
-            }
-        }
-
-        var analyzers = new ConcurrentBag<(int, HandAnalyzer<TCardGroup, TCardGroupName>)>();
-
-        Parallel.ForEach(list, tuple =>
-        {
-            var (sortId, buildArgument) = tuple;
             var analyzer = new HandAnalyzer<TCardGroup, TCardGroupName>(buildArgument);
-            analyzers.Add((sortId, analyzer));
+            analyzers.Add((buildArgument, analyzer));
         });
 
-        return analyzers
-            .OrderBy(static x => x.Item1)
-            .Select(static x => x.Item2)
-            .ToList();
+        var analyzerByBuildArgs = new Dictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>>();
+
+        foreach(var (buildArgs, analyzer) in analyzers)
+        {
+            analyzerByBuildArgs[buildArgs] = analyzer;
+        }
+
+        return analyzerByBuildArgs;
     }
 
     public static HandAnalyzer<TCardGroup, TCardGroupName> Excavate<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> originalAnalyzer, HandCombination<TCardGroupName> hand)
