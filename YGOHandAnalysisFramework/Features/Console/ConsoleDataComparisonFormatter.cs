@@ -6,8 +6,6 @@ namespace YGOHandAnalysisFramework.Features.Console;
 
 public sealed class ConsoleDataComparisonFormatter : IDataComparisonFormatter
 {
-    public static CreateDataComparisonFormat Factory { get; } = (entries, categoryResults) => new ConsoleDataComparisonFormatter(entries, categoryResults);
-
     public ConsoleDataComparisonFormatter(IEnumerable<IDataComparisonFormatterEntry> entries, IEnumerable<IDataComparisonCategoryResults> categoryResults)
     {
         Entries = new(entries);

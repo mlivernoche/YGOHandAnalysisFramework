@@ -5,6 +5,7 @@ using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
 using YGOHandAnalysisFramework.Data.Formatting;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 namespace YGOHandAnalysisFramework.Projects.CardCounter;
 
@@ -15,7 +16,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private IReadOnlySet<TCardGroupName> CardsToCount { get; }
     private Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> MiscFactory { get; }
-    private CreateDataComparisonFormat DataComparisonFormatFactory { get; }
+    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
 
     private record Context(int CardsToCount, IReadOnlySet<TCardGroupName> CardNames);
 
@@ -26,7 +27,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         IEnumerable<TCardGroupName> cardsToCount,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
     {
         ProjectName = projectName ?? nameof(CardCounter);
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
@@ -40,7 +41,7 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         IEnumerable<TCardGroup> cardsToCount,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
         : this(
               projectName,
               handAnalyzers,

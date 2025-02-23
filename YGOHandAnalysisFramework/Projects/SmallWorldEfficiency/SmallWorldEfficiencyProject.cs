@@ -4,8 +4,8 @@ using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.SmallWorld;
-using YGOHandAnalysisFramework.Projects.PotOfProsperity;
 
 namespace YGOHandAnalysisFramework.Projects.SmallWorldEfficiency;
 
@@ -19,7 +19,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
     private TCardGroupName SmallWorldName { get; }
     private TCardGroupName MiscName { get; }
     private HashSet<TCardGroupName> SearchTargets { get; }
-    private CreateDataComparisonFormat DataComparisonFormatFactory { get; }
+    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(SmallWorldEfficiencyProject<TCardGroup, TCardGroupName>);
 
@@ -28,7 +28,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
         TCardGroupName smallWorldName,
         TCardGroupName miscName,
         IEnumerable<TCardGroupName> targets,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
     {
         HandAnalyzers = new(handAnalyzers);
         SmallWorldName = smallWorldName;

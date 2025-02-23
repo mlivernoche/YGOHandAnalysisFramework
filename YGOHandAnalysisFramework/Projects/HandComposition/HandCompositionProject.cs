@@ -22,13 +22,13 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private IEnumerable<TCategory> HandCompositionCategories { get; }
     private IEqualityComparer<TCategory> EqualityComparer { get; }
-    private CreateDataComparisonFormat DataComparisonFormatFactory { get; }
+    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
 
     public HandCompositionProject(
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         IEnumerable<TCategory> categories,
         IEqualityComparer<TCategory> equalityComparer,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
         : this(handAnalyzers, categories, equalityComparer, [], dataComparisonFormatFactory)
     {
     }
@@ -38,7 +38,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
         IEnumerable<TCategory> categories,
         IEqualityComparer<TCategory> equalityComparer,
         IEnumerable<WeightedProbabilityCollection<HandAnalyzer<TCardGroup, TCardGroupName>>> weightedProbabilities,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
     {
         HandAnalyzers = handAnalyzers;
         HandCompositionCategories = categories;

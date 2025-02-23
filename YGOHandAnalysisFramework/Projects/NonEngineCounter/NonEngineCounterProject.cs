@@ -4,6 +4,7 @@ using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 namespace YGOHandAnalysisFramework.Projects.NonEngineCounter;
 
@@ -13,14 +14,14 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject
 {
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> MiscFactory { get; }
-    private CreateDataComparisonFormat DataComparisonFormatFactory { get; }
+    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(NonEngineCounterProject<TCardGroup, TCardGroupName>);
 
     public NonEngineCounterProject(
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        CreateDataComparisonFormat createDataComparisonFormat)
+        IDataComparisonFormatterFactory createDataComparisonFormat)
     {
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
         MiscFactory = miscFactory;

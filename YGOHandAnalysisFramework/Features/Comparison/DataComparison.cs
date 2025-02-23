@@ -168,7 +168,7 @@ public class DataComparison<TComparison>
         Categories = new HashSet<IDataComparisonCategory<TComparison>>([.. original.Categories, ..categories]);
     }
 
-    public IDataComparisonFormatter Run(CreateDataComparisonFormat createDataComparisonFormat)
+    public IDataComparisonFormatter Run(IDataComparisonFormatterFactory factory)
     {
         var results = new List<IDataComparisonCategoryResults>();
 
@@ -177,10 +177,10 @@ public class DataComparison<TComparison>
             results.Add(category.GetResults(ComparisonFocuses));
         }
 
-        return createDataComparisonFormat(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
+        return factory.CreateFormatter(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
     }
 
-    public IDataComparisonFormatter RunInParallel(CreateDataComparisonFormat createDataComparisonFormat)
+    public IDataComparisonFormatter RunInParallel(IDataComparisonFormatterFactory factory)
     {
         var list = new List<(int, IDataComparisonCategory<TComparison>)>();
 
@@ -204,6 +204,6 @@ public class DataComparison<TComparison>
             .OrderBy(static x => x.SortId)
             .Select(static x => x.Result)
             .ToList();
-        return createDataComparisonFormat(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
+        return factory.CreateFormatter(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
     }
 }

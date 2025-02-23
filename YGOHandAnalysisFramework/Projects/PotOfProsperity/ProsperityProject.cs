@@ -3,6 +3,7 @@ using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Comparison;
 using YGOHandAnalysisFramework.Data.Formatting;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 namespace YGOHandAnalysisFramework.Projects.PotOfProsperity;
 
@@ -15,7 +16,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
     private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private TCardGroupName ProsperityName { get; }
     private TCardGroupName MiscName { get; }
-    private CreateDataComparisonFormat DataComparisonFormatFactory { get; }
+    private IDataComparisonFormatterFactory DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(ProsperityProject<TCardGroup, TCardGroupName>);
 
@@ -23,7 +24,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         TCardGroupName prosperityName,
         TCardGroupName miscName,
-        CreateDataComparisonFormat dataComparisonFormatFactory)
+        IDataComparisonFormatterFactory dataComparisonFormatFactory)
     {
         HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
         ProsperityName = prosperityName;
