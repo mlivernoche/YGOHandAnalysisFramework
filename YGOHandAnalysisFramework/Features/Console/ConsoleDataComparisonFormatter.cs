@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using YGOHandAnalysisFramework.Features.Comparison;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 
 namespace YGOHandAnalysisFramework.Features.Console;
