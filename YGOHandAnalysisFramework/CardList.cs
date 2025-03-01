@@ -10,6 +10,12 @@ namespace YGOHandAnalysisFramework;
 
 public static class CardList
 {
+    /// <summary>
+    /// Create an empty <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The type to use for the card groups. Card groups are a bundle of cards with the same name (identified by <typeparamref name="TCardGroupName"/>). It can also have addition data, such as the card's ATK, DEF, etc.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used to identify the card of each card group.</typeparam>
+    /// <returns>The empty <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list.</returns>
     [Pure]
     public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>()
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -18,6 +24,13 @@ public static class CardList
         return new CardList<TCardGroup, TCardGroupName>([]);
     }
 
+    /// <summary>
+    /// Create a <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list from a <c>ICardGroupCollection&lt;<typeparamref name="TCardGroup" />, <typeparamref name="TCardGroupName" />&gt;</c> <paramref name="cardGroups"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The type to use for the card groups. Card groups are a bundle of cards with the same name (identified by <typeparamref name="TCardGroupName"/>). It can also have addition data, such as the card's ATK, DEF, etc.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used to identify the card of each card group.</typeparam>
+    /// <param name="cardGroups">The card groups to add to the <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list.</param>
+    /// <returns>The <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list with all the card groups.</returns>
     [Pure]
     public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(ICardGroupCollection<TCardGroup, TCardGroupName> cardGroups)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -25,15 +38,28 @@ public static class CardList
     {
         return new CardList<TCardGroup, TCardGroupName>(cardGroups);
     }
-
+    /// <summary>
+    /// Create a <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list from a <c>IEnumerable&lt;<typeparamref name="TCardGroup" />&gt;</c> <paramref name="cardGroups"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The type to use for the card groups. Card groups are a bundle of cards with the same name (identified by <typeparamref name="TCardGroupName"/>). It can also have addition data, such as the card's ATK, DEF, etc.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used to identify the card of each card group.</typeparam>
+    /// <param name="cardGroups">The card groups to add to the <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list.</param>
+    /// <returns>The <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list with all the card groups.</returns>
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cards)
+    public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cardGroups)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        return new CardList<TCardGroup, TCardGroupName>(cards);
+        return new CardList<TCardGroup, TCardGroupName>(cardGroups);
     }
 
+    /// <summary>
+    /// Create a <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list from a <c>HandAnalyzer&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> <paramref name="analyzer"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The type to use for the card groups. Card groups are a bundle of cards with the same name (identified by <typeparamref name="TCardGroupName"/>). It can also have addition data, such as the card's ATK, DEF, etc.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used to identify the card of each card group.</typeparam>
+    /// <param name="analyzer">The analyzer which will be used to build the <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list.</param>
+    /// <returns>The <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list with all the card groups.</returns>
     [Pure]
     public static CardList<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(HandAnalyzer<TCardGroup, TCardGroupName> analyzer)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -42,14 +68,23 @@ public static class CardList
         return new CardList<TCardGroup, TCardGroupName>(analyzer.CardGroups.Values);
     }
 
+    /// <summary>
+    /// An assertion. If the provided <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> <paramref name="cardList"/> is not equal
+    /// to the provided <c>size</c>, then an exception will be thrown.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The type to use for the card groups. Card groups are a bundle of cards with the same name (identified by <typeparamref name="TCardGroupName"/>). It can also have addition data, such as the card's ATK, DEF, etc.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used to identify the card of each card group.</typeparam>
+    /// <param name="cardList">the provided <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> card list</param>
+    /// <param name="expectedDeckListSize">The expected size of the <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> <paramref name="cardList"/>. If they differ, then an exception is thrown.</param>
+    /// <returns>The provided <c>CardList&lt;<typeparamref name="TCardGroup"/>, <typeparamref name="TCardGroupName"/>&gt;</c> <paramref name="cardList"/>.</returns>
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> CheckSize<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards, int size)
+    public static CardList<TCardGroup, TCardGroupName> AssertSize<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cardList, int expectedDeckListSize)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var listSize = cards.Sum(static group => group.Size);
-        Guard.IsEqualTo(size, listSize);
-        return cards;
+        var listSize = cardList.GetNumberOfCards();
+        Guard.IsEqualTo(expectedDeckListSize, listSize);
+        return cardList;
     }
 
     [Pure]
@@ -138,6 +173,11 @@ public static class CardList
         return new CardList<TCardGroup, TCardGroupName>(dict.Values);
     }
 
+    /// <summary>
+    /// Gets the deck size of the card list; the summation of all .Size in the card list.
+    /// </summary>
+    /// <param name="cardList">The card list.</param>
+    /// <returns>The deck size.</returns>
     [Pure]
     public static int GetNumberOfCards<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cardList)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -146,6 +186,11 @@ public static class CardList
         return cardList.Sum(static group => group.Size);
     }
 
+    /// <summary>
+    /// Gets the deck size of the card list; the summation of all .Size in the card list.
+    /// </summary>
+    /// <param name="cardList">The card list.</param>
+    /// <returns>The deck size.</returns>
     [Pure]
     public static int GetNumberOfCards<TCardGroup, TCardGroupName>(this IEnumerable<TCardGroup> cardList)
         where TCardGroup : ICardGroup<TCardGroupName>
