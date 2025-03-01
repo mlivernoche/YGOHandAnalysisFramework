@@ -1,4 +1,5 @@
-﻿using YGOHandAnalysisFramework.Data;
+﻿using System.Collections.Immutable;
+using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Data.Extensions.Linq;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Comparison.Calculator;
@@ -8,16 +9,63 @@ namespace YGOHandAnalysisFramework.Features.Configuration;
 
 public static class Configuration
 {
-    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>>> CreateAnalyzers<TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<TCardGroupName> miscNameFactory)
+    private static ICardGroupCollection<TCardGroup, TCardGroupName> Filter<TCardGroup, TCardGroupName>(ICardGroupCollection<TCardGroup, TCardGroupName> original, IReadOnlySet<TCardGroupName> supportedCards)
+        where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var analyzersCollection = new CalculatorWrapperCollection<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>>();
+        if(supportedCards.Count == 0)
+        {
+            return original;
+        }
+
+        var cardsThatAreSupported = new CardGroupCollection<TCardGroup, TCardGroupName>();
+
+        foreach (var card in original)
+        {
+            if (!supportedCards.Contains(card.Name))
+            {
+                continue;
+            }
+
+            cardsThatAreSupported = cardsThatAreSupported.Add(card);
+        }
+
+        return cardsThatAreSupported;
+    }
+
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>>> CreateAnalyzers<TCardGroupName>(this IConfiguration<TCardGroupName> config, TCardGroupName miscCardGroupName)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return config.CreateAnalyzers(size => CardGroup.Create(miscCardGroupName, size, 0, size), static cardGroup => cardGroup, ImmutableHashSet<TCardGroupName>.Empty);
+    }
+
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>>> CreateAnalyzers<TCardGroupName>(this IConfiguration<TCardGroupName> config, TCardGroupName miscCardGroupName, IReadOnlySet<TCardGroupName> supportedCards)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return config.CreateAnalyzers(size => CardGroup.Create(miscCardGroupName, size, 0, size), static cardGroup => cardGroup, supportedCards);
+    }
+
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty);
+    }
+
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory, IReadOnlySet<TCardGroupName> supportedCards)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var analyzersCollection = new CalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>>();
 
         foreach (var deckList in config.DeckLists)
         {
+            var cardsThatAreSupported = Filter(deckList.Cards, supportedCards);
+            var fillSize = Math.Max(deckList.Cards.GetNumberOfCards(), config.CardListFillSize);
+
             var cardList = CardList
-                .Create(deckList.Cards)
-                .Fill(config.CardListFillSize, size => CardGroup.Create(miscNameFactory(), size, 0, size));
+                .Create<TCardGroup, TCardGroupName>(cardsThatAreSupported.Select(cardGroupFactory))
+                .Fill(fillSize, size => miscGroupFactory(size));
 
             var buildArgs = config
                 .HandSizes
