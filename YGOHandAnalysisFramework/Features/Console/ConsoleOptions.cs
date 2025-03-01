@@ -12,4 +12,7 @@ public class ConsoleOptions
 
     [Option("useweighteds", Default = false)]
     public bool CreateWeightedProbabilities { get; set; } = false;
+
+    [Option("source", Default = "")]
+    public string CardInputStreamSource { get; set; } = string.Empty;
 }

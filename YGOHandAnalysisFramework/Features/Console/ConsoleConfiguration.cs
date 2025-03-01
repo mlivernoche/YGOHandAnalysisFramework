@@ -8,7 +8,6 @@ using YGOHandAnalysisFramework.Data.Archive;
 using YGOHandAnalysisFramework.Data.Json;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.Configuration;
-using YGOHandAnalysisFramework.Features.Console.Json;
 
 namespace YGOHandAnalysisFramework.Features.Console;
 
@@ -36,8 +35,13 @@ public static class ConsoleConfiguration
         return TryGetOptions(args.SplitArgs());
     }
 
-    public static Result<Stream, Exception> TryOpenStandardInputStream()
+    public static Result<Stream, Exception> TryOpenCardInputStream(ConsoleOptions consoleOptions)
     {
+        if(Path.Exists(consoleOptions.CardInputStreamSource))
+        {
+            return new(new FileStream(consoleOptions.CardInputStreamSource, FileMode.Open, FileAccess.Read));
+        }
+
         try
         {
             return new(System.Console.OpenStandardInput());
@@ -140,9 +144,9 @@ public sealed class ConsoleConfiguration<TCardGroupName> : IConfiguration<TCardG
     public IEnumerable<IConfigurationDeckList<TCardGroupName>> DeckLists { get; }
     public IHandAnalyzerOutputStream OutputStream { get; }
     public CreateDataComparisonFormatter FormatterFactory { get; }
-    public int CardListFillSize { get; } = 40;
-    public IEnumerable<int> HandSizes { get; } = [5, 6];
-    public bool CreateWeightedProbabilities { get; } = true;
+    public int CardListFillSize { get; }
+    public IEnumerable<int> HandSizes { get; }
+    public bool CreateWeightedProbabilities { get; }
 
     public ConsoleConfiguration(ConsoleOptions consoleOptions, IEnumerable<IConfigurationDeckList<TCardGroupName>> deckLists)
     {
