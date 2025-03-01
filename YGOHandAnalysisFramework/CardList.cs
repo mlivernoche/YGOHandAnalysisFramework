@@ -154,6 +154,22 @@ public static class CardList
         return cardList.Sum(static group => group.Size);
     }
 
+    /// <summary>
+    /// Gets the deck size of the card list; the summation of all .Size in the card list.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The CardGroup type.</typeparam>
+    /// <typeparam name="TCardGroupName">The type of the name used in the CardGroup.</typeparam>
+    /// <param name="cardList">The card list.</param>
+    /// <returns>The deck size.</returns>
+    [Pure]
+    public static int GetNumberOfCards<TCardGroup, TCardGroupName>(this ICardGroupCollection<TCardGroup, TCardGroupName> cardList)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        IEnumerable<TCardGroup> enumerable = cardList;
+        return enumerable.GetNumberOfCards<TCardGroup, TCardGroupName>();
+    }
+
     [Pure]
     public static CardList<TCardGroup, TCardGroupName> Cast<TCardGroupOld, TCardGroup, TCardGroupName>(this CardList<TCardGroupOld, TCardGroupName> cardList, Func<TCardGroupOld, TCardGroup> converter)
         where TCardGroupOld : ICardGroup<TCardGroupName>
