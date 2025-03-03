@@ -17,6 +17,11 @@ public class CalculatorWrapperCollection<T> : IReadOnlyCollection<ICalculatorWra
         Wrappers.Add(new CalculatorWrapper<T, TValue>(value));
     }
 
+    public void Add(T value)
+    {
+        Wrappers.Add(new CalculatorWrapper<T>(value));
+    }
+
     public IEnumerator<ICalculatorWrapper<T>> GetEnumerator()
     {
         IEnumerable<ICalculatorWrapper<T>> enumerable = Wrappers;

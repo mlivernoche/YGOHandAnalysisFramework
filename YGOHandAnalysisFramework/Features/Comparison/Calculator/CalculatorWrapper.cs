@@ -38,3 +38,6 @@ public class CalculatorWrapper<TWrapped, TValue> : ICalculatorWrapper<TWrapped>
         return entry.GetDescription();
     }
 }
+
+public class CalculatorWrapper<TWrapped>(TWrapped value) : CalculatorWrapper<TWrapped, TWrapped>(value)
+    where TWrapped : notnull, ICalculator<TWrapped>, IDataComparisonFormatterEntry;
