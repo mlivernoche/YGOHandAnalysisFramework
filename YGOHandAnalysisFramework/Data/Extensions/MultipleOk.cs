@@ -13,7 +13,7 @@ public static class MultipleOk
             return hand.CountEffectiveCopies(multipleOK);
         }
 
-        return card.Minimum;
+        return hand.CountCopiesOfCardInHand(card.Name);
     }
 
     public static int CountEffectiveCopies<TCardGroup, TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroup card)
