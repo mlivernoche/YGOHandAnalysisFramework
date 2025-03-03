@@ -5,18 +5,17 @@ using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
 using YGOHandAnalysisFramework.Data.Formatting;
-using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
+using YGOHandAnalysisFramework.Features.Configuration;
+using YGOHandAnalysisFramework.Data;
 
 namespace YGOHandAnalysisFramework.Projects.CardCounter;
 
-public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
-    where TCardGroup : IMultipleOK<TCardGroupName>
+public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject<TCardGroup, TCardGroupName>
+    where TCardGroup : ICardGroup<TCardGroupName>, IMultipleOK<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
-    private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
-    private IReadOnlySet<TCardGroupName> CardsToCount { get; }
-    private Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> MiscFactory { get; }
-    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
+    public IReadOnlySet<TCardGroupName> SupportedCardNames { get; }
 
     private record Context(int CardsToCount, IReadOnlySet<TCardGroupName> CardNames);
 
@@ -24,63 +23,48 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
 
     public CardCounterProject(
         string projectName,
-        IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
-        IEnumerable<TCardGroupName> cardsToCount,
-        Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        CreateDataComparisonFormatter dataComparisonFormatFactory)
+        IEnumerable<TCardGroupName> cardsToCount)
     {
         ProjectName = projectName ?? nameof(CardCounter);
-        HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
-        CardsToCount = cardsToCount.ToImmutableHashSet();
-        MiscFactory = miscFactory ?? throw new ArgumentNullException(nameof(miscFactory));
-        DataComparisonFormatFactory = dataComparisonFormatFactory ?? throw new ArgumentNullException(nameof(dataComparisonFormatFactory));
+        SupportedCardNames = cardsToCount.ToImmutableHashSet();
     }
 
     public CardCounterProject(
         string projectName,
-        IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
-        IEnumerable<TCardGroup> cardsToCount,
-        Transform.CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory,
-        CreateDataComparisonFormatter dataComparisonFormatFactory)
-        : this(
-              projectName,
-              handAnalyzers,
-              cardsToCount.Select(static group => group.Name),
-              miscFactory,
-              dataComparisonFormatFactory)
+        IEnumerable<TCardGroup> cardsToCount)
+        : this(projectName, cardsToCount.Select(static group => group.Name))
     { }
 
-    public void Run(IHandAnalyzerOutputStream outputStream)
+    public void Run(ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> calculators, IConfiguration<TCardGroupName> configuration)
     {
         var probabilityFormatter = new PercentFormat<double>();
         var numericalFormatter = new CardinalFormat<double>();
 
-        var optimizedAnalyzers = HandAnalyzers.Optimize(CardsToCount, MiscFactory);
+        var maxNumberOfCardsToCount = calculators.Max(static handAnalyzer => handAnalyzer.Calculate(static analyzer => analyzer.HandSize));
 
-        var maxNumberOfCardsToCount = optimizedAnalyzers.Max(static handAnalyzer => handAnalyzer.HandSize);
-
-        var comparison = DataComparison.Create(optimizedAnalyzers);
+        var comparison = DataComparison.Create(calculators);
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.AddCategory($"Count={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, HasThisNumberOfCards));
+            comparison = comparison.AddCategory($"Count={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability((analyzer, hand) => CountCards(analyzer, hand) == i));
         }
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.AddCategory($"Count>={i:N0}", probabilityFormatter, new Context(i, CardsToCount), static (handAnalyzer, num) => handAnalyzer.CalculateProbability(num, HasAtLeastThisNumberOfCards));
+            comparison = comparison.AddCategory($"Count>={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability((analyzer, hand) => CountCards(analyzer, hand) >= i));
         }
 
-        var results = comparison
-            .AddCategory("E(HT)", numericalFormatter, new Context(0, CardsToCount), static (handAnalyzer, context) => handAnalyzer.CalculateExpectedValue(context, CountCards))
-            .RunInParallel(DataComparisonFormatFactory);
-        outputStream.Write(results.FormatResults());
+        comparison
+            .AddCategory("E(HT)", numericalFormatter, analyzer => analyzer.CalculateExpectedValue((analyzer, hand) => CountCards(analyzer, hand)))
+            .RunInParallel(configuration.FormatterFactory)
+            .FormatResults()
+            .Write(configuration.OutputStream);
     }
 
-    private static double CountCards(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context, HandCombination<TCardGroupName> hand)
+    private double CountCards(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand)
     {
         var total = 0;
-        var cardNames = context.CardNames;
+        var cardNames = SupportedCardNames;
 
         foreach (var card in hand.GetCardsInHand(handAnalyzer))
         {
@@ -91,15 +75,5 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject
         }
 
         return total;
-    }
-
-    private static bool HasThisNumberOfCards(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context, HandCombination<TCardGroupName> hand)
-    {
-        return CountCards(handAnalyzer, context, hand) == context.CardsToCount;
-    }
-
-    private static bool HasAtLeastThisNumberOfCards(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context, HandCombination<TCardGroupName> hand)
-    {
-        return CountCards(handAnalyzer, context, hand) >= context.CardsToCount;
     }
 }

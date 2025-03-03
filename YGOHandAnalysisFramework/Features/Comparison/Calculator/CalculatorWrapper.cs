@@ -3,6 +3,19 @@ using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.Comparison.Calculator;
 
+public static class CalculatorWrapper
+{
+    public static Func<ICalculatorWrapper<TWrapped>, double> Wrap<TWrapped>(this Func<TWrapped, double> func)
+    {
+        return calculator => calculator.Calculate(func);
+    }
+
+    public static Func<ICalculatorWrapper<TWrapped>, double> Wrap<TWrapped, TArgs>(this Func<TWrapped, TArgs, double> func, TArgs args)
+    {
+        return calculator => calculator.Calculate(args, func);
+    }
+}
+
 public class CalculatorWrapper<TWrapped, TValue> : ICalculatorWrapper<TWrapped>
     where TWrapped : notnull, ICalculator<TWrapped>, IDataComparisonFormatterEntry
     where TValue : notnull, ICalculator<TWrapped>, IDataComparisonFormatterEntry

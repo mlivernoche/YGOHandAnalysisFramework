@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics.Contracts;
 using YGOHandAnalysisFramework.Data.Formatting;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.Probability;
 
@@ -49,17 +50,6 @@ public static class DataComparison
         return new DataComparison<TComparison>(comparison, category);
     }
 
-    /// <summary>
-    /// Add a category to a <c>IDataComparison</c>. Each category is projected, or applied, to each <c>TComparison</c>.
-    /// This method is does not modify the input.
-    /// </summary>
-    /// <typeparam name="TComparison">The type of the object that is being compared (with other objects of the same type).</typeparam>
-    /// <typeparam name="TReturn">The type of the value calculated by the category.</typeparam>
-    /// <param name="comparison">The <c>HandAnalyzerComparison</c> to add the category.</param>
-    /// <param name="name">The name of the category.</param>
-    /// <param name="formatter">The string format of the value calculated by the category.</param>
-    /// <param name="func">The calculator of <c>TReturn</c> value, which will be applied to each <c>TComparison</c>.</param>
-    /// <returns>The <c>HandAnalyzerComparison</c> provided.</returns>
     [Pure]
     public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func)
         where TComparison : IDataComparisonFormatterEntry
@@ -69,30 +59,43 @@ public static class DataComparison
     }
 
     [Pure]
-    public static DataComparison<TComparison> AddCategoryWithWrappedValue<TComparison, TWrapped>(this DataComparison<TComparison> comparison, string name, IFormat<double> formatter, Func<TWrapped, double> func)
-        where TComparison : ICalculator<TWrapped>, IDataComparisonFormatterEntry
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, Func<TComparison, double> func)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
     {
-        var category = new DataComparisonCategory<TComparison, double>(name, formatter, calculator => calculator.Calculate(func));
-        return new DataComparison<TComparison>(comparison, category);
+        var category = new DataComparisonCategory<ICalculatorWrapper<TComparison>, double>(name, formatter, func.Wrap());
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
     }
 
     /// <summary>
-    /// Add a category to a <c>HandAnalyzerComparison</c>. Each category is projected, or applied, to each <c>HandAnalyzer</c>.
+    /// Create a new instance of <c>DataComparison&lt;<typeparamref name="TComparison"/>&gt;</c> with another category added to it.
+    /// This is a pure function, which means it does not modify the <paramref name="comparison"/> parameter, nor any of the other arguments.
     /// </summary>
     /// <typeparam name="TComparison">The type of the object that is being compared (with other objects of the same type).</typeparam>
     /// <typeparam name="TReturn">The type of the value calculated by the category.</typeparam>
-    /// <param name="comparison">The <c>HandAnalyzerComparison</c> to add the category.</param>
+    /// <param name="comparison">The <c>DataComparison</c> to add the category.</param>
     /// <param name="name">The name of the category.</param>
     /// <param name="formatter">The string format of the value calculated by the category.</param>
-    /// <param name="func">The calculator of <c>TReturn</c> value, which will be applied to each <c>HandAnalyzer</c>.</param>
-    /// <param name="optimizer">This can take a <c>HandAnalyzer</c> can transform it into a version that is more optimized for the <c>func</c>. Typically, this means it will have less <c>CardGroup</c>s, which means less <c>HandCombination</c> objects to enumerate over.</param>
-    /// <returns>The <c>HandAnalyzerComparison</c> provided.</returns>
+    /// <param name="func">The calculator of <typeparamref name="TReturn"/> value, which will be applied to each <typeparamref name="TComparison"/>.</param>
+    /// <param name="optimizer">This can take a <c>HandAnalyzer</c> can transform it into a version that is more optimized for the <c>func</c>.</param>
+    /// <returns>Another instance of <c>DataComparison</c>, with a new category added. This is not the original <paramref name="comparison"/>.</returns>
     [Pure]
     public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TReturn>(name, formatter, func, optimizer);
         return new DataComparison<TComparison>(comparison, category);
+    }
+
+    [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, Func<TComparison, double> func, Func<TComparison, TComparison> optimizer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategory<ICalculatorWrapper<TComparison>, double>(name, formatter, calculator => calculator.Calculate(comparison =>
+        {
+            var optimizedVersion = optimizer(comparison);
+            return func(optimizedVersion);
+        }));
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
     }
 
     [Pure]
@@ -104,11 +107,31 @@ public static class DataComparison
     }
 
     [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, Func<TComparison, double> func, IComparer<double> comparer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategoryRanked<ICalculatorWrapper<TComparison>, double>(name, formatter, func.Wrap(), comparer);
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
+    }
+
+    [Pure]
     public static DataComparison<TComparison> AddCategory<TComparison, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, Func<TComparison, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategoryRanked<TComparison, TReturn>(name, formatter, func, comparer, optimizer);
         return new DataComparison<TComparison>(comparison, category);
+    }
+
+    [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, Func<TComparison, double> func, IComparer<double> comparer, Func<TComparison, TComparison> optimizer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategoryRanked<ICalculatorWrapper<TComparison>, double>(name, formatter, calculator => calculator.Calculate(comparison =>
+        {
+            var optimizedVersion = optimizer(comparison);
+            return func(optimizedVersion);
+        }), comparer);
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
     }
 
     [Pure]
@@ -120,11 +143,31 @@ public static class DataComparison
     }
 
     [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison, TArgs>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, TArgs args, Func<TComparison, TArgs, double> func)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategory<ICalculatorWrapper<TComparison>, TArgs, double>(name, formatter, args, (calculator, args) => calculator.Calculate(args, func));
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
+    }
+
+    [Pure]
     public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
         var category = new DataComparisonCategory<TComparison, TArgs, TReturn>(name, formatter, args, func, optimizer);
         return new DataComparison<TComparison>(comparison, category);
+    }
+
+    [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison, TArgs>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, TArgs args, Func<TComparison, TArgs, double> func, Func<TComparison, TComparison> optimizer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategory<ICalculatorWrapper<TComparison>, TArgs, double>(name, formatter, args, (calculator, args) => calculator.Calculate(args, (comparison, args) =>
+        {
+            var optimizedVersion = optimizer(comparison);
+            return func(optimizedVersion, args);
+        }));
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
     }
 
     [Pure]
@@ -141,6 +184,18 @@ public static class DataComparison
     {
         var category = new DataComparisonCategoryRanked<TComparison, TArgs, TReturn>(name, formatter, args, func, comparer, optimizer);
         return new DataComparison<TComparison>(comparison, category);
+    }
+
+    [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison, TArgs>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, TArgs args, Func<TComparison, TArgs, double> func, IComparer<double> comparer, Func<TComparison, TComparison> optimizer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategoryRanked<ICalculatorWrapper<TComparison>, TArgs, double>(name, formatter, args, (calculator, args) => calculator.Calculate(args, (comparison, args) =>
+        {
+            var optimizedVersion = optimizer(comparison);
+            return func(optimizedVersion, args);
+        }), comparer);
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
     }
 }
 

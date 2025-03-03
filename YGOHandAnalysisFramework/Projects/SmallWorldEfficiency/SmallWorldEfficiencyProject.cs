@@ -4,46 +4,45 @@ using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Configuration;
 using YGOHandAnalysisFramework.Features.SmallWorld;
 
 namespace YGOHandAnalysisFramework.Projects.SmallWorldEfficiency;
 
-public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IProject
+public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IProject<TCardGroup, TCardGroupName>
     where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>, ISmallWorldCard<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
     private record Context(TCardGroupName SmallWorldName, TCardGroupName MiscName, HashSet<TCardGroupName> SearchTargets);
 
-    private HashSet<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private TCardGroupName SmallWorldName { get; }
     private TCardGroupName MiscName { get; }
     private HashSet<TCardGroupName> SearchTargets { get; }
-    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(SmallWorldEfficiencyProject<TCardGroup, TCardGroupName>);
 
+    public IReadOnlySet<TCardGroupName> SupportedCardNames { get; }
+
     public SmallWorldEfficiencyProject(
-        IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
         TCardGroupName smallWorldName,
         TCardGroupName miscName,
-        IEnumerable<TCardGroupName> targets,
-        CreateDataComparisonFormatter dataComparisonFormatFactory)
+        IEnumerable<TCardGroupName> targets)
     {
-        HandAnalyzers = new(handAnalyzers);
         SmallWorldName = smallWorldName;
         MiscName = miscName;
-        SearchTargets = new(targets);
-        DataComparisonFormatFactory = dataComparisonFormatFactory;
+        SearchTargets = [.. targets];
+        SupportedCardNames = new HashSet<TCardGroupName>([.. SearchTargets, SmallWorldName]);
     }
 
-    public void Run(IHandAnalyzerOutputStream outputStream)
+    public void Run(ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> calculators, IConfiguration<TCardGroupName> configuration)
     {
         var context = new Context(SmallWorldName, MiscName, SearchTargets);
 
-        var comparison = DataComparison
-            .Create(HandAnalyzers)
-            .AddCategory("Hand Has No Search Targets", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, static (args, hand) =>
+        DataComparison
+            .Create(calculators)
+            .AddCategory("Hand Has No Search Targets", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, static (hand, args) =>
             {
                 if (!hand.HasThisCard(args.SmallWorldName))
                 {
@@ -53,7 +52,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
                 var numberOfSearchTargets = 0;
                 var foundSearchTargets = 0;
 
-                foreach(var searchTarget in args.SearchTargets)
+                foreach (var searchTarget in args.SearchTargets)
                 {
                     numberOfSearchTargets++;
 
@@ -65,41 +64,88 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
 
                 return numberOfSearchTargets == foundSearchTargets;
             }))
-            .AddCategory("Hand Has Small World", PercentFormat<double>.Default, context, static (analyzer, args) => analyzer.CalculateProbability(args, HasSmallWorld))
-            .AddCategory("Small World Can Find A Target", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCard))
+            .AddCategory("Hand Has Small World", PercentFormat<double>.Default, context.SmallWorldName, HasSmallWorld)
+            .AddCategory("Small World Can Find A Target", PercentFormat<double>.Default, context, CanSmallWorldFindCard())
             .AddCategory("Small World Can Find A Target (Net)", PercentFormat<double>.Default, context, (analyzer, args) => analyzer.CalculateProbability(args, CanSmallWorldFindCardNet))
-            .AddCategory("Small World Efficiency", PercentFormat<double>.Default, context, static (analyzer, args) =>
-            {
-                var hasCard = analyzer.CalculateProbability(args, HasSmallWorld);
-                var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCard);
+            //.AddCategory("Small World Efficiency", PercentFormat<double>.Default, context, static (analyzer, args) =>
+            //{
+            //    var hasCard = HasSmallWorld(analyzer, args.SmallWorldName);
+            //    var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCard);
 
-                if(hasCard == 0.0)
-                {
-                    return 0.0;
-                }
+            //    if (hasCard == 0.0)
+            //    {
+            //        return 0.0;
+            //    }
 
-                return canFind / hasCard;
-            })
-            .AddCategory("Small World Efficiency (Net)", PercentFormat<double>.Default, context, static (analyzer, args) =>
-            {
-                var hasCard = analyzer.CalculateProbability(args, HasSmallWorld);
-                var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCardNet);
+            //    return canFind / hasCard;
+            //})
+            //.AddCategory("Small World Efficiency (Net)", PercentFormat<double>.Default, context, static (analyzer, args) =>
+            //{
+            //    var hasCard = HasSmallWorld(analyzer, args.SmallWorldName);
+            //    var canFind = analyzer.CalculateProbability(args, CanSmallWorldFindCardNet);
 
-                if (hasCard == 0.0)
-                {
-                    return 0.0;
-                }
+            //    if (hasCard == 0.0)
+            //    {
+            //        return 0.0;
+            //    }
 
-                return canFind / hasCard;
-            })
-            .RunInParallel(DataComparisonFormatFactory)
-            .FormatResults();
-        outputStream.Write(comparison);
+            //    return canFind / hasCard;
+            //})
+            .RunInParallel(configuration.FormatterFactory)
+            .FormatResults()
+            .Write(configuration.OutputStream);
     }
 
-    private static bool HasSmallWorld(Context args, HandCombination<TCardGroupName> hand)
+    private static Func<HandAnalyzer<TCardGroup, TCardGroupName>, Context, double> ProbabilityOfNoSearchTargets()
     {
-        return hand.HasThisCard(args.SmallWorldName);
+        return (analyzer, args) => analyzer.CalculateProbability(args, static (hand, args) =>
+        {
+            if (!hand.HasThisCard(args.SmallWorldName))
+            {
+                return false;
+            }
+
+            var numberOfSearchTargets = 0;
+            var foundSearchTargets = 0;
+
+            foreach (var searchTarget in args.SearchTargets)
+            {
+                numberOfSearchTargets++;
+
+                if (hand.HasThisCard(searchTarget))
+                {
+                    foundSearchTargets++;
+                }
+            }
+
+            return numberOfSearchTargets == foundSearchTargets;
+        });
+    }
+
+    private static double HasSmallWorld(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, TCardGroupName name)
+    {
+        return analyzer.CalculateProbability(name, static (hand, name) => hand.HasThisCard(name));
+    }
+
+    private static Func<HandAnalyzer<TCardGroup, TCardGroupName>, Context, double> CanSmallWorldFindCard()
+    {
+        return (analyzer, context) => analyzer.CalculateProbability(context, (analyzer, hand, context) =>
+        {
+            if (!hand.HasThisCard(context.SmallWorldName))
+            {
+                return false;
+            }
+
+            foreach (var searchTarget in context.SearchTargets)
+            {
+                if (analyzer.SmallWorldCanFindCard(context.SmallWorldName, searchTarget, hand))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 
     private static bool CanSmallWorldFindCard(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context args, HandCombination<TCardGroupName> hand)
@@ -120,7 +166,7 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
         return false;
     }
 
-    private static bool CanSmallWorldFindCardNet(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context args, HandCombination<TCardGroupName> hand)
+    private static bool CanSmallWorldFindCardNet(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand, Context args)
     {
         if (!hand.HasThisCard(args.SmallWorldName))
         {

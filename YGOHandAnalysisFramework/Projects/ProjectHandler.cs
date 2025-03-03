@@ -1,26 +1,33 @@
 ﻿using System.Diagnostics;
+using YGOHandAnalysisFramework.Data;
+using YGOHandAnalysisFramework.Features.Analysis;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Configuration;
 
 namespace YGOHandAnalysisFramework.Projects;
 
-public sealed class ProjectHandler : IProjectHandler
+public sealed class ProjectHandler<TCardGroup, TCardGroupName> : IProjectHandler<TCardGroup, TCardGroupName>
+    where TCardGroup : ICardGroup<TCardGroupName>
+    where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
-    public void RunProjects(IEnumerable<IProject> projectsToRun, IHandAnalyzerOutputStream outputStream)
+    public void RunProjects(IEnumerable<IProject<TCardGroup, TCardGroupName>> projectsToRun, ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> calculators, IConfiguration<TCardGroupName> configuration)
     {
-        var collection = new List<IProject>(projectsToRun);
+        var collection = new List<IProject<TCardGroup, TCardGroupName>>(projectsToRun);
 
-        outputStream.Write($"{nameof(ProjectHandler)}: running {collection.Count:N0} project(s).");
+        configuration.OutputStream.Write($"{nameof(ProjectHandler<TCardGroup, TCardGroupName>)}: running {collection.Count:N0} project(s).");
 
         int i = 1;
         foreach(var project in collection)
         {
-            outputStream.Write($"{nameof(ProjectHandler)}: running project #{i:N0} ({project.ProjectName}).");
+            configuration.OutputStream.Write($"{nameof(ProjectHandler<TCardGroup, TCardGroupName>)}: running project #{i:N0} ({project.ProjectName}).");
             var stopwatch = Stopwatch.StartNew();
-            project.Run(outputStream);
+            project.Run(calculators, configuration);
             stopwatch.Stop();
-            outputStream.Write($"{nameof(ProjectHandler)}: finished project #{i:N0} ({project.ProjectName}). {stopwatch.Elapsed.TotalMilliseconds:N3} ms.");
+            configuration.OutputStream.Write($"{nameof(ProjectHandler<TCardGroup, TCardGroupName>)}: finished project #{i:N0} ({project.ProjectName}). {stopwatch.Elapsed.TotalMilliseconds:N3} ms.");
             i++;
         }
 
-        outputStream.Write($"{nameof(ProjectHandler)}: finished running project(s).");
+        configuration.OutputStream.Write($"{nameof(ProjectHandler<TCardGroup, TCardGroupName>)}: finished running project(s).");
     }
 }

@@ -131,7 +131,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, Filter(handAnalyzer, filter), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
-    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, bool> filter)
+    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -139,7 +139,7 @@ public static class HandAnalyzer
         {
             foreach (var hand in handAnalyzer.Combinations)
             {
-                if (filter(handAnalyzer, args, hand))
+                if (filter(handAnalyzer, hand, args))
                 {
                     yield return hand;
                 }
@@ -149,7 +149,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
-    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<TArgs, HandCombination<TCardGroupName>, bool> filter)
+    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -157,7 +157,7 @@ public static class HandAnalyzer
         {
             foreach (var hand in handAnalyzer.Combinations)
             {
-                if (filter(args, hand))
+                if (filter(hand, args))
                 {
                     yield return hand;
                 }
@@ -174,7 +174,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, hand, handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<TArgs, HandCombination<TCardGroupName>, double> valueFunction)
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -182,7 +182,7 @@ public static class HandAnalyzer
 
         foreach (var hand in handAnalyzer.Combinations)
         {
-            var value = valueFunction(args, hand);
+            var value = valueFunction(hand, args);
             if (value > 0)
             {
                 expectedValue += handAnalyzer.CalculateProbability(hand) * value;

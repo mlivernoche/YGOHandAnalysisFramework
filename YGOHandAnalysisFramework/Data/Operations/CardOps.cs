@@ -96,12 +96,12 @@ public static partial class CardOps
 
             var prob = analyzer.CalculateProbability(hand);
             var prospAnalyzer = analyzer.Excavate(hand, depth);
-            prob *= prospAnalyzer.CalculateProbability(cardsToSearch, static (cardNames, hand) => hand.HasAnyOfTheseCards(cardNames));
+            prob *= prospAnalyzer.CalculateProbability(cardsToSearch, static (hand, cardNames) => hand.HasAnyOfTheseCards(cardNames));
 
             prospFindsSomethingGood += prob;
         }
 
-        var hasProsp = analyzer.CalculateProbability(potOfProsperityName, static (cardName, hand) => hand.HasThisCard(cardName));
+        var hasProsp = analyzer.CalculateProbability(potOfProsperityName, static (hand, cardName) => hand.HasThisCard(cardName));
         return prospFindsSomethingGood / hasProsp;
     }
 }

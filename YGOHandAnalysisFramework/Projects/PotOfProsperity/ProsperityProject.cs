@@ -4,70 +4,63 @@ using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Comparison;
 using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
+using YGOHandAnalysisFramework.Features.Configuration;
 
 namespace YGOHandAnalysisFramework.Projects.PotOfProsperity;
 
-public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
+public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup, TCardGroupName>
     where TCardGroup : IProsperityTargetCardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
     private record Context(TCardGroupName ProsperityName, TCardGroupName MiscName, int BanishNumber);
 
-    private IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> HandAnalyzers { get; }
     private TCardGroupName ProsperityName { get; }
     private TCardGroupName MiscName { get; }
-    private CreateDataComparisonFormatter DataComparisonFormatFactory { get; }
 
     public string ProjectName => nameof(ProsperityProject<TCardGroup, TCardGroupName>);
 
-    public ProsperityProject(
-        IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers,
-        TCardGroupName prosperityName,
-        TCardGroupName miscName,
-        CreateDataComparisonFormatter dataComparisonFormatFactory)
+    public ProsperityProject(TCardGroupName prosperityName, TCardGroupName miscName)
     {
-        HandAnalyzers = handAnalyzers ?? throw new ArgumentNullException(nameof(handAnalyzers));
         ProsperityName = prosperityName;
         MiscName = miscName;
-        DataComparisonFormatFactory = dataComparisonFormatFactory ?? throw new ArgumentNullException(nameof(dataComparisonFormatFactory));
     }
 
-    public void Run(IHandAnalyzerOutputStream outputStream)
+    public void Run(ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> calculators, IConfiguration<TCardGroupName> configuration)
     {
         var probabilityFormatter = new PercentFormat<double>();
         var numericalFormatter = new CardinalFormat<double>();
 
         void CreateComparison(int banishNumber)
         {
+            var globalContext = new Context(ProsperityName, MiscName, banishNumber);
             var comparison = DataComparison
-                .Create(HandAnalyzers)
-                .AddCategory($"P(Banish={banishNumber:N0})", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateProbability)
-                .AddCategory($"Banish={banishNumber:N0} Hit %", probabilityFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateHitPercentage)
-                .AddCategory($"EV(Banish={banishNumber:N0})", numericalFormatter, new Context(ProsperityName, MiscName, banishNumber), CalculateExpectedValue);
+                .Create(calculators)
+                .AddCategory($"P(Banish={banishNumber:N0})", probabilityFormatter, globalContext, static (analyzer, context) => CalculateProbability(analyzer, context.ProsperityName, context.MiscName, context.BanishNumber))
+                .AddCategory($"Banish={banishNumber:N0} Hit %", probabilityFormatter, globalContext, static (analyzer, context) => CalculateHitPercentage(analyzer, context.ProsperityName, context.MiscName, context.BanishNumber))
+                .AddCategory($"EV(Banish={banishNumber:N0})", numericalFormatter, globalContext, static (analyzer, context) => CalculateExpectedValue(analyzer, context.ProsperityName, context.MiscName, context.BanishNumber));
 
             for(int i = 0; i <= banishNumber; i++)
             {
                 var context = new Context(ProsperityName, MiscName, banishNumber);
-                comparison = comparison.AddCategory($"P(Find={i:N0})", probabilityFormatter, (context, i), static (analyzer, context) => CalculateCertainAmountProb(analyzer, context.context, context.i));
+                comparison = comparison.AddCategory($"P(Find={i:N0})", probabilityFormatter, context, CalculateCertainAmountProb(i));
             }
 
-            var results = comparison.RunInParallel(DataComparisonFormatFactory);
-            outputStream.Write(results.FormatResults());
+            comparison
+                .RunInParallel(configuration.FormatterFactory)
+                .FormatResults()
+                .Write(configuration.OutputStream);
         }
 
-        var comparison = DataComparison
-            .Create(HandAnalyzers)
-            .AddCategory("Drawn Prosperity", probabilityFormatter, new Context(ProsperityName, MiscName, 3), static (handAnalyzer, context) => handAnalyzer.CalculateProbability(context, static (context, hand) => hand.HasThisCard(context.ProsperityName)))
-            .Run(DataComparisonFormatFactory);
-        outputStream.Write(comparison.FormatResults());
+        DataComparison
+            .Create(calculators)
+            .AddCategory("Drawn Prosperity", probabilityFormatter, ProsperityName, static (analyzer, cardName) => analyzer.CalculateProbability(cardName, (hand, cardName) => hand.HasThisCard(cardName)))
+            .Run(configuration.FormatterFactory)
+            .FormatResults()
+            .Write(configuration.OutputStream);
 
         CreateComparison(3);
         CreateComparison(6);
-    }
-
-    private static double CalculateProbability(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context)
-    {
-        return CalculateProbability(handAnalyzer, context.ProsperityName, context.MiscName, context.BanishNumber);
     }
 
     private static double CalculateProbability(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TCardGroupName prosperityName, TCardGroupName miscName, int prosperityBanishNumber)
@@ -119,15 +112,10 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         return totalProb;
     }
 
-    private static double CalculateHitPercentage(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context)
-    {
-        return CalculateHitPercentage(handAnalyzer, context.ProsperityName, context.MiscName, context.BanishNumber);
-    }
-
     private static double CalculateHitPercentage(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TCardGroupName prosperityName, TCardGroupName miscName, int prosperityBanishNumber)
     {
         var probOfHitting = CalculateProbability(handAnalyzer, prosperityName, miscName, prosperityBanishNumber);
-        var probOfDrawingProsperity = handAnalyzer.CalculateProbability(prosperityName, static (name, hand) => hand.HasThisCard(name));
+        var probOfDrawingProsperity = handAnalyzer.CalculateProbability(prosperityName, static (hand, name) => hand.HasThisCard(name));
 
         if(probOfDrawingProsperity > 0)
         {
@@ -135,11 +123,6 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         }
 
         return 0.0;
-    }
-
-    private static double CalculateExpectedValue(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context)
-    {
-        return CalculateExpectedValue(handAnalyzer, context.ProsperityName, context.MiscName, context.BanishNumber);
     }
 
     private static double CalculateExpectedValue(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TCardGroupName prosperityName, TCardGroupName miscName, int prosperityBanishNumber)
@@ -193,9 +176,9 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject
         return expectedValue;
     }
 
-    private static double CalculateCertainAmountProb(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Context context, int numberOfTargetsFound)
+    private static Func<HandAnalyzer<TCardGroup, TCardGroupName>, Context, double> CalculateCertainAmountProb(int numberOfTargetsFound)
     {
-        return CalculateCertainAmountProb(handAnalyzer, context.ProsperityName, context.MiscName, context.BanishNumber, numberOfTargetsFound);
+        return (analyzer, context) => CalculateCertainAmountProb(analyzer, context.ProsperityName, context.MiscName, context.BanishNumber, numberOfTargetsFound);
     }
 
     private static double CalculateCertainAmountProb(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TCardGroupName prosperityName, TCardGroupName miscName, int prosperityBanishNumber, int numberOfTargetsFound)

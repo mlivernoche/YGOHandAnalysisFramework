@@ -1,13 +1,15 @@
-﻿namespace YGOHandAnalysisFramework.Projects;
+﻿using YGOHandAnalysisFramework.Data;
+using YGOHandAnalysisFramework.Features.Analysis;
+using YGOHandAnalysisFramework.Features.Comparison.Calculator;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using YGOHandAnalysisFramework.Features.Configuration;
 
-public interface IProject
-{
-    string ProjectName { get; }
-    void Run(IHandAnalyzerOutputStream outputStream);
-}
+namespace YGOHandAnalysisFramework.Projects;
 
-public interface IProject<TCardGroupName> : IProject
+public interface IProject<TCardGroup, TCardGroupName>
+    where TCardGroup : ICardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
-    IEnumerable<TCardGroupName> SupportedCards { get; }
+    string ProjectName { get; }
+    void Run(ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> calculators, IConfiguration<TCardGroupName> configuration);
 }
