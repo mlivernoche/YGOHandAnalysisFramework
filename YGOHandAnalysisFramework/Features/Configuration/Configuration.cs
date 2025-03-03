@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Data.Extensions.Linq;
 using YGOHandAnalysisFramework.Features.Analysis;
@@ -9,6 +10,33 @@ namespace YGOHandAnalysisFramework.Features.Configuration;
 
 public static class Configuration
 {
+    public static bool AreAllCardNamesRecognized<TCardGroupName>(this IConfiguration<TCardGroupName> config, IReadOnlySet<TCardGroupName> allCardNames, [NotNullWhen(false)] out IEnumerable<TCardGroupName>? cardsNotFound)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var namesMentioned = config
+            .DeckLists
+            .SelectMany(static deckList => deckList.Cards.Select(static group => group.Name))
+            .ToHashSet();
+        var cardsNotFoundUnique = new HashSet<TCardGroupName>();
+
+        foreach(var mentioned in namesMentioned)
+        {
+            if(!allCardNames.Contains(mentioned))
+            {
+                cardsNotFoundUnique.Add(mentioned);
+            }
+        }
+
+        if(cardsNotFoundUnique.Count != 0)
+        {
+            cardsNotFound = cardsNotFoundUnique;
+            return false;
+        }
+
+        cardsNotFound = default;
+        return true;
+    }
+
     private static ICardGroupCollection<TCardGroup, TCardGroupName> Filter<TCardGroup, TCardGroupName>(ICardGroupCollection<TCardGroup, TCardGroupName> original, IReadOnlySet<TCardGroupName> supportedCards)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
