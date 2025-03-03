@@ -52,7 +52,7 @@ public static class Configuration
         return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty);
     }
 
-    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory, IReadOnlySet<TCardGroupName> supportedCards)
+    public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory, IReadOnlySet<TCardGroupName> supportedCards)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {

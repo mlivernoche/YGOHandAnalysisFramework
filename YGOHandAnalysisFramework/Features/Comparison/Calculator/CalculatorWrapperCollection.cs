@@ -4,7 +4,7 @@ using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.Comparison.Calculator;
 
-public class CalculatorWrapperCollection<T> : IReadOnlyCollection<ICalculatorWrapper<T>>
+public class CalculatorWrapperCollection<T> : ICalculatorWrapperCollection<T>
     where T : ICalculator<T>, IDataComparisonFormatterEntry
 {
     public int Count => Wrappers.Count;
