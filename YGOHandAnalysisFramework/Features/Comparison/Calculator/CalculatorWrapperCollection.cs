@@ -11,6 +11,21 @@ public class CalculatorWrapperCollection<T> : ICalculatorWrapperCollection<T>
 
     private List<ICalculatorWrapper<T>> Wrappers { get; } = new List<ICalculatorWrapper<T>>();
 
+    public CalculatorWrapperCollection() { }
+
+    public CalculatorWrapperCollection(IEnumerable<T> calculators)
+    {
+        foreach(var calculator in calculators)
+        {
+            Add(calculator);
+        }
+    }
+
+    public CalculatorWrapperCollection(IEnumerable<ICalculatorWrapper<T>> calculators)
+    {
+        Wrappers.AddRange(calculators);
+    }
+
     public void Add<TValue>(TValue value)
         where TValue : ICalculator<T>, IDataComparisonFormatterEntry
     {
