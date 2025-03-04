@@ -10,6 +10,12 @@ namespace YGOHandAnalysisFramework.Features.Configuration;
 
 public static class Configuration
 {
+    public static IReadOnlySet<TCardGroupName> GetAllCardNames<TCardGroupName>(this IConfiguration<TCardGroupName> config)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new HashSet<TCardGroupName>(config.DeckLists.SelectMany(static deckList => deckList.Cards).Select(static group => group.Name));
+    }
+
     public static bool AreAllCardNamesRecognized<TCardGroupName>(this IConfiguration<TCardGroupName> config, IReadOnlySet<TCardGroupName> allCardNames, [NotNullWhen(false)] out IEnumerable<TCardGroupName>? cardsNotFound)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
