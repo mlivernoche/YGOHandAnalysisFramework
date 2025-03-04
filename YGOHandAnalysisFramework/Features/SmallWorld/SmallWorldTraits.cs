@@ -12,6 +12,37 @@ public sealed record SmallWorldTraits : ISmallWorldTraits
 
     private SmallWorldTraits() { }
 
+    public static bool IsSmallWorldCard<TCardGroupName>(IYGOCard<TCardGroupName> cardData)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        if (cardData.Level is null)
+        {
+            return false;
+        }
+
+        if (cardData.AttackPoints is null)
+        {
+            return false;
+        }
+
+        if (cardData.DefensePoints is null)
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(cardData.MonsterType) || string.IsNullOrWhiteSpace(cardData.MonsterType))
+        {
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(cardData.MonsterAttribute) || string.IsNullOrWhiteSpace(cardData.MonsterAttribute))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     public static ISmallWorldTraits? TryCreate<TCardGroupName>(IYGOCard<TCardGroupName> cardData)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
