@@ -13,6 +13,93 @@ namespace YGOHandAnalysisFramework.Features.Console;
 
 public static class ConsoleConfiguration
 {
+    public static async Task<int> Execute<TCardGroup, TCardGroupName>(string[] args, IReadOnlySet<TCardGroupName> allCardNames, Func<TCardGroupName, string> printName, ConsoleAnalyzerComponents<TCardGroup, TCardGroupName> componentsLoader)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+#if DEBUG
+        System.Console.WriteLine("Running in DEBUG mode.");
+#endif
+
+#if RELEASE
+        System.Console.WriteLine("Running in RELEASE mode.");
+#endif
+
+        System.Console.WriteLine();
+        System.Console.WriteLine($"Parsing console arguments: {string.Join(' ', args)}");
+
+        if (!TryGetOptions(args).GetResult(out var consoleOptions, out var consoleErrors))
+        {
+            System.Console.Error.WriteLine(CompileConsoleErrors(args, consoleErrors));
+            return -1;
+        }
+
+        System.Console.WriteLine("Completed parsing console arguments.");
+        System.Console.WriteLine();
+        System.Console.WriteLine("Opening stdin.");
+
+        if (!TryOpenCardInputStream(consoleOptions).GetResult(out var inputStream, out var inputStreamError))
+        {
+            var exception = inputStreamError;
+            while (exception != null)
+            {
+                System.Console.Error.WriteLine(exception.Message);
+                System.Console.Error.WriteLine(exception.StackTrace);
+                exception = exception.InnerException;
+            }
+            return -2;
+        }
+
+        System.Console.WriteLine("stdin opened.");
+        System.Console.WriteLine();
+
+        try
+        {
+            using (inputStream)
+            {
+                System.Console.WriteLine("Building configuration.");
+                var config = await GetConfigurationAsync(consoleOptions, inputStream, componentsLoader.CreateCardGroupName);
+                System.Console.WriteLine("Completed building configuration.");
+                System.Console.WriteLine();
+
+                if (!config.AreAllCardNamesRecognized(allCardNames, out var cardsNotFound))
+                {
+                    config.OutputStream.Write("The following cards are not recognized and may impact the results of the models:");
+
+                    foreach (var cardName in cardsNotFound)
+                    {
+                        config.OutputStream.Write(printName(cardName));
+                    }
+
+                    System.Console.WriteLine();
+                }
+
+                System.Console.WriteLine("Building analyzers.");
+                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet());
+                System.Console.WriteLine("Completed building analyzers.");
+                System.Console.WriteLine();
+
+                System.Console.WriteLine("Running projects.");
+                var handler = componentsLoader.CreateProjectHandler();
+                handler.RunProjects(componentsLoader.CreateProjects(), analyzersCollection, config);
+                System.Console.WriteLine("Completed running projects.");
+
+                return 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            var exception = ex;
+            while (exception != null)
+            {
+                System.Console.Error.WriteLine(exception.Message);
+                System.Console.Error.WriteLine(exception.StackTrace);
+                exception = exception.InnerException;
+            }
+            return -3;
+        }
+    }
+
     public static Result<ConsoleOptions, IEnumerable<Error>> TryGetOptions(string[] args)
     {
         Result<ConsoleOptions, IEnumerable<Error>> result = new();
