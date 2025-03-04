@@ -111,7 +111,7 @@ public static class Configuration
                 analyzersCollection.Add(analyzer);
             }
 
-            if(config.CreateWeightedProbabilities)
+            if(config.CreateWeightedProbabilities && handAnalyzers.Count > 1)
             {
                 var weightedProbabilities = WeightedProbabilityCollection.CreateWithEqualWeights(deckList.Name, handAnalyzers.OrderBy(buildArgs));
                 analyzersCollection.Add(weightedProbabilities);
