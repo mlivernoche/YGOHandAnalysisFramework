@@ -1,6 +1,5 @@
 ﻿using CommandLine;
 using CommunityToolkit.Diagnostics;
-using Microsoft.CodeAnalysis;
 using System.Text;
 using System.Text.Json;
 using YGOHandAnalysisFramework.Data;
@@ -75,7 +74,7 @@ public static class ConsoleConfiguration
                 }
 
                 System.Console.WriteLine("Building analyzers.");
-                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet());
+                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet(), componentsLoader.CreateCacheLoader());
                 System.Console.WriteLine("Completed building analyzers.");
                 System.Console.WriteLine();
 
@@ -234,12 +233,14 @@ public sealed class ConsoleConfiguration<TCardGroupName> : IConfiguration<TCardG
     public int CardListFillSize { get; }
     public IEnumerable<int> HandSizes { get; }
     public bool CreateWeightedProbabilities { get; }
+    public bool UseCache { get; }
 
     public ConsoleConfiguration(ConsoleOptions consoleOptions, IEnumerable<IConfigurationDeckList<TCardGroupName>> deckLists)
     {
         CardListFillSize = consoleOptions.CardListFillSize;
         HandSizes = consoleOptions.HandSizes.ToArray();
         CreateWeightedProbabilities = consoleOptions.CreateWeightedProbabilities;
+        UseCache = consoleOptions.UseCache;
 
         DeckLists = deckLists.ToList();
         OutputStream = new HandAnalyzerConsoleOutputStream();

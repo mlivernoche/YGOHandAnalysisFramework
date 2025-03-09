@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Data.Extensions.Linq;
 using YGOHandAnalysisFramework.Features.Analysis;
+using YGOHandAnalysisFramework.Features.Caching;
 using YGOHandAnalysisFramework.Features.Comparison.Calculator;
 using YGOHandAnalysisFramework.Features.WeightedProbability;
 
@@ -79,14 +80,66 @@ public static class Configuration
         return config.CreateAnalyzers(size => CardGroup.Create(miscCardGroupName, size, 0, size), static cardGroup => cardGroup, supportedCards);
     }
 
-    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory)
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(
+        this IConfiguration<TCardGroupName> config,
+        Func<int, TCardGroup> miscGroupFactory,
+        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty);
+        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty, static buildArgs => HandAnalyzer.CreateInParallel(buildArgs));
     }
 
-    public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(this IConfiguration<TCardGroupName> config, Func<int, TCardGroup> miscGroupFactory, Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory, IReadOnlySet<TCardGroupName> supportedCards)
+    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(
+        this IConfiguration<TCardGroupName> config,
+        Func<int, TCardGroup> miscGroupFactory,
+        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
+        HandAnalyzerLoader<TCardGroup, TCardGroupName> cacheLoader)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty, cacheLoader);
+    }
+
+    public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(
+        this IConfiguration<TCardGroupName> config,
+        Func<int, TCardGroup> miscGroupFactory,
+        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
+        IReadOnlySet<TCardGroupName> supportedCards)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, supportedCards, static buildArgs => HandAnalyzer.CreateInParallel(buildArgs));
+    }
+
+    public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(
+        this IConfiguration<TCardGroupName> config,
+        Func<int, TCardGroup> miscGroupFactory,
+        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
+        IReadOnlySet<TCardGroupName> supportedCards,
+        HandAnalyzerLoader<TCardGroup, TCardGroupName> cacheLoader)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzer(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArgs)
+        {
+            if(config.UseCache)
+            {
+                return HandAnalyzer.CreateInParallel(buildArgs, cacheLoader);
+            }
+
+            return HandAnalyzer.CreateInParallel(buildArgs);
+        }
+
+        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, supportedCards, CreateAnalyzer);
+    }
+
+    private static CalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(
+        this IConfiguration<TCardGroupName> config,
+        Func<int, TCardGroup> miscGroupFactory,
+        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
+        IReadOnlySet<TCardGroupName> supportedCards,
+        Func<IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>>, IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>>> createAnalyzers)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -105,15 +158,15 @@ public static class Configuration
                 .HandSizes
                 .Select(handSize => HandAnalyzerBuildArguments.Create($"{deckList.Name}, {handSize:N0}", handSize, cardList));
 
-            var handAnalyzers = HandAnalyzer.CreateInParallel(buildArgs);
-            foreach (var analyzer in handAnalyzers.OrderBy(buildArgs))
+            var handAnalyzers = createAnalyzers(buildArgs);
+            foreach (var (_, analyzer) in handAnalyzers.OrderBy(buildArgs))
             {
                 analyzersCollection.Add(analyzer);
             }
 
-            if(config.CreateWeightedProbabilities && handAnalyzers.Count > 1)
+            if (config.CreateWeightedProbabilities && handAnalyzers.Count > 1)
             {
-                var weightedProbabilities = WeightedProbabilityCollection.CreateWithEqualWeights(deckList.Name, handAnalyzers.OrderBy(buildArgs));
+                var weightedProbabilities = WeightedProbabilityCollection.CreateWithEqualWeights(deckList.Name, handAnalyzers.OrderBy(buildArgs).Select(static kv => kv.Value));
                 analyzersCollection.Add(weightedProbabilities);
             }
         }

@@ -11,4 +11,5 @@ public interface IConfiguration<TCardGroupName>
     int CardListFillSize { get; }
     IEnumerable<int> HandSizes { get; }
     bool CreateWeightedProbabilities { get; }
+    bool UseCache { get; }
 }

@@ -1,4 +1,5 @@
 ﻿using YGOHandAnalysisFramework.Data;
+using YGOHandAnalysisFramework.Features.Caching;
 using YGOHandAnalysisFramework.Features.Configuration;
 using YGOHandAnalysisFramework.Projects;
 
@@ -12,6 +13,7 @@ public abstract class ConsoleAnalyzerComponents<TCardGroup, TCardGroupName>
     public abstract TCardGroupName CreateCardGroupName(string name);
     public abstract TCardGroup CreateMiscCardGroup(int size);
     public abstract TCardGroup CreateCardGroup(ICardGroup<TCardGroupName> cardGroup);
+    public abstract HandAnalyzerLoader<TCardGroup, TCardGroupName> CreateCacheLoader();
 
     public virtual IEnumerable<TCardGroupName> GetSupportedCards(IConfiguration<TCardGroupName> configuration)
     {

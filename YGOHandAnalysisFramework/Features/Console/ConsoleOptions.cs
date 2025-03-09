@@ -15,4 +15,7 @@ public class ConsoleOptions
 
     [Option("source", Default = "")]
     public string CardInputStreamSource { get; set; } = string.Empty;
+
+    [Option("usecache", Default = false)]
+    public bool UseCache { get; set; } = false;
 }
