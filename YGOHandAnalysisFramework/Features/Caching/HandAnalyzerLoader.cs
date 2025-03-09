@@ -61,6 +61,7 @@ namespace YGOHandAnalysisFramework.Features.Caching
 
             var cache = new HandAnalyzerCacheDTO
             {
+                HandSize = handAnalyzer.HandSize,
                 CardGroups = [.. cardGroups],
                 HandCombinations = [.. handCombinations],
             };
@@ -98,6 +99,11 @@ namespace YGOHandAnalysisFramework.Features.Caching
             }
 
             if (Deserialize(filePath) is not (true, HandAnalyzerCacheDTO cache))
+            {
+                return (false, null);
+            }
+
+            if(cache.HandSize != buildArgs.HandSize)
             {
                 return (false, null);
             }
