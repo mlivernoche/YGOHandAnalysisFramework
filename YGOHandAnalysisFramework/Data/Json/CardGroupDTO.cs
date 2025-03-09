@@ -1,6 +1,6 @@
 ﻿namespace YGOHandAnalysisFramework.Data.Json;
 
-public sealed class CardGroupDTO
+public class CardGroupDTO
 {
     public string Name { get; set; } = string.Empty;
     public int Size { get; set; }

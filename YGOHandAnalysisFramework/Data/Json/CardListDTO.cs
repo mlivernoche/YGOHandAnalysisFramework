@@ -1,6 +1,6 @@
 ﻿namespace YGOHandAnalysisFramework.Data.Json;
 
-public sealed class CardListDTO
+public class CardListDTO
 {
     public CardGroupDTO[] Cards { get; set; } = [];
 

@@ -1,6 +1,6 @@
 ﻿namespace YGOHandAnalysisFramework.Features.Caching
 {
-    internal sealed class HandElementDTO
+    internal class HandElementDTO
     {
         public string HandName { get; set; } = string.Empty;
         public int MinimumSize { get; set; }
