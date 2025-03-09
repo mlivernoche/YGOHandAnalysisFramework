@@ -1,6 +1,4 @@
-﻿using CardSourceGenerator;
-
-namespace YGOHandAnalysisFramework.Features.SmallWorld;
+﻿namespace YGOHandAnalysisFramework.Features.SmallWorld;
 
 public sealed record SmallWorldTraits : ISmallWorldTraits
 {
@@ -12,30 +10,29 @@ public sealed record SmallWorldTraits : ISmallWorldTraits
 
     private SmallWorldTraits() { }
 
-    public static bool IsSmallWorldCard<TCardGroupName>(IYGOCard<TCardGroupName> cardData)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    public static bool IsSmallWorldCard(int? level, int? atkPoints, int? defPoints, string? monsterType, string? monsterAttribute)
     {
-        if (cardData.Level is null)
+        if (level is null)
         {
             return false;
         }
 
-        if (cardData.AttackPoints is null)
+        if (atkPoints is null)
         {
             return false;
         }
 
-        if (cardData.DefensePoints is null)
+        if (defPoints is null)
         {
             return false;
         }
 
-        if (string.IsNullOrEmpty(cardData.MonsterType) || string.IsNullOrWhiteSpace(cardData.MonsterType))
+        if (string.IsNullOrEmpty(monsterType) || string.IsNullOrWhiteSpace(monsterType))
         {
             return false;
         }
 
-        if (string.IsNullOrEmpty(cardData.MonsterAttribute) || string.IsNullOrWhiteSpace(cardData.MonsterAttribute))
+        if (string.IsNullOrEmpty(monsterAttribute) || string.IsNullOrWhiteSpace(monsterAttribute))
         {
             return false;
         }
@@ -43,41 +40,40 @@ public sealed record SmallWorldTraits : ISmallWorldTraits
         return true;
     }
 
-    public static ISmallWorldTraits? TryCreate<TCardGroupName>(IYGOCard<TCardGroupName> cardData)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    public static ISmallWorldTraits? TryCreate(int? level, int? atkPoints, int? defPoints, string? monsterType, string? monsterAttribute)
     {
-        if (cardData.Level is null)
+        if (level is null)
         {
             return null;
         }
 
-        if (cardData.AttackPoints is null)
+        if (atkPoints is null)
         {
             return null;
         }
 
-        if (cardData.DefensePoints is null)
+        if (defPoints is null)
         {
             return null;
         }
 
-        if (string.IsNullOrEmpty(cardData.MonsterType) || string.IsNullOrWhiteSpace(cardData.MonsterType))
+        if (string.IsNullOrEmpty(monsterType) || string.IsNullOrWhiteSpace(monsterType))
         {
             return null;
         }
 
-        if (string.IsNullOrEmpty(cardData.MonsterAttribute) || string.IsNullOrWhiteSpace(cardData.MonsterAttribute))
+        if (string.IsNullOrEmpty(monsterAttribute) || string.IsNullOrWhiteSpace(monsterAttribute))
         {
             return null;
         }
 
         return new SmallWorldTraits
         {
-            Level = cardData.Level.Value,
-            AttackPoints = cardData.AttackPoints.Value,
-            DefensePoints = cardData.DefensePoints.Value,
-            MonsterType = cardData.MonsterType,
-            MonsterAttribute = cardData.MonsterAttribute,
+            Level = level.Value,
+            AttackPoints = atkPoints.Value,
+            DefensePoints = defPoints.Value,
+            MonsterType = monsterType,
+            MonsterAttribute = monsterAttribute,
         };
     }
 }
