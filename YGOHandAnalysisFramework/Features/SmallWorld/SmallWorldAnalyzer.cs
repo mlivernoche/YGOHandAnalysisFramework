@@ -1,3 +1,4 @@
+﻿using System.Collections;
 ﻿using System.Collections.Immutable;
 using YGOHandAnalysisFramework.Data;
 
@@ -71,7 +72,7 @@ public static class SmallWorldAnalyzer
     }
 }
 
-public sealed class SmallWorldAnalyzer<TCardGroupName>
+public sealed class SmallWorldAnalyzer<TCardGroupName> : IEnumerable<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
     private DictionaryWithGeneratedKeys<TCardGroupName, ISmallWorldCard<TCardGroupName>> Cards { get; }
@@ -217,5 +218,17 @@ public sealed class SmallWorldAnalyzer<TCardGroupName>
         }
 
         return false;
+    }
+
+    public IEnumerator<TCardGroupName> GetEnumerator()
+    {
+        IEnumerable<TCardGroupName> enumerator = Cards.Keys;
+        return enumerator.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        IEnumerable enumerator = Cards.Keys;
+        return enumerator.GetEnumerator();
     }
 }
