@@ -24,7 +24,7 @@ public static class HandAnalyzer
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        if (loader.TryLoadHandAnalyzer(buildArguments) is (true, HandAnalyzer<TCardGroup, TCardGroupName> loadedAnalyzer))
+        if (loader.TryLoadHandAnalyzer(buildArguments).GetResult(out var loadedAnalyzer, out _))
         {
             return loadedAnalyzer;
         }
@@ -44,7 +44,7 @@ public static class HandAnalyzer
 
         foreach (var args in buildArguments)
         {
-            if (loader.TryLoadHandAnalyzer(args) is not (true, HandAnalyzer<TCardGroup, TCardGroupName> loadedAnalyzer))
+            if (!loader.TryLoadHandAnalyzer(args).GetResult(out var loadedAnalyzer, out _))
             {
                 hardLoads.Add(args);
                 continue;

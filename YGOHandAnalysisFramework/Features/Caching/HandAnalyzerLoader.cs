@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using SharpCompress.Common;
+using System.Text.Json;
 using YGOHandAnalysisFramework.Data;
+using YGOHandAnalysisFramework.Data.Extensions.Json;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 
@@ -9,15 +11,15 @@ namespace YGOHandAnalysisFramework.Features.Caching
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        internal (bool Success, HandAnalyzer<TCardGroup, TCardGroupName>? Result) TryLoadHandAnalyzer(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
+        internal Result<HandAnalyzer<TCardGroup, TCardGroupName>, Exception> TryLoadHandAnalyzer(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
         {
-
-            if (TryLoadFromCache($"{buildArgs.AnalyzerName}.json", buildArgs) is (true, HandAnalyzer<TCardGroup, TCardGroupName> cached))
+            using var source = LoadFromCache(buildArgs);
+            if (!TryLoadFromCache(source, buildArgs).GetResult(out var handAnalyzer, out var error))
             {
-                return (true, cached);
+                return new(error);
             }
 
-            return (false, null);
+            return new(handAnalyzer);
         }
 
         internal void CreateCache(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
@@ -78,34 +80,16 @@ namespace YGOHandAnalysisFramework.Features.Caching
             }
         }
 
-        private (bool Success, HandAnalyzer<TCardGroup, TCardGroupName>? Result) TryLoadFromCache(string filePath, HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
+        private Result<HandAnalyzer<TCardGroup, TCardGroupName>, Exception> TryLoadFromCache(Stream source, HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
         {
-            static (bool Success, HandAnalyzerCacheDTO? Result) Deserialize(string filePath)
+            if (!JsonExtensions.TryParseValue<HandAnalyzerCacheDTO>(source).GetResult(out var handAnalyzerCache, out var jsonError))
             {
-                using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                var result = JsonSerializer.Deserialize<HandAnalyzerCacheDTO>(stream);
-
-                if (result != null)
-                {
-                    return (true, result);
-                }
-
-                return (false, null);
+                return new(jsonError);
             }
 
-            if (!File.Exists(filePath))
+            if(handAnalyzerCache.HandSize != buildArgs.HandSize)
             {
-                return (false, null);
-            }
-
-            if (Deserialize(filePath) is not (true, HandAnalyzerCacheDTO cache))
-            {
-                return (false, null);
-            }
-
-            if(cache.HandSize != buildArgs.HandSize)
-            {
-                return (false, null);
+                return new(new Exception($"Hand sizes don't match: {handAnalyzerCache.HandSize} ({nameof(handAnalyzerCache)}) vs {buildArgs.HandSize} ({nameof(buildArgs)})."));
             }
 
             var cardGroups = new List<CardGroupDTO>();
@@ -122,17 +106,17 @@ namespace YGOHandAnalysisFramework.Features.Caching
                 });
             }
 
-            var cacheSet = new HashSet<CardGroupDTO>(cache.CardGroups, CardComparer.Instance);
+            var cacheSet = new HashSet<CardGroupDTO>(handAnalyzerCache.CardGroups, CardComparer.Instance);
             var cardGroupsSet = new HashSet<CardGroupDTO>(cardGroups, CardComparer.Instance);
 
             if (!cacheSet.SetEquals(cardGroupsSet))
             {
-                return (false, null);
+                return new(new Exception($"Cached ({nameof(handAnalyzerCache)}) CardGroups do not match with provided ({nameof(buildArgs)}) CardGroups."));
             }
 
             var handCombinations = new HashSet<HandCombination<TCardGroupName>>();
 
-            foreach (var hand in cache.HandCombinations)
+            foreach (var hand in handAnalyzerCache.HandCombinations)
             {
                 var elements = new HashSet<HandElement<TCardGroupName>>();
                 foreach (var cardName in hand.CardNames)
@@ -148,7 +132,12 @@ namespace YGOHandAnalysisFramework.Features.Caching
                 handCombinations.Add(new HandCombination<TCardGroupName>(elements));
             }
 
-            return (true, new HandAnalyzer<TCardGroup, TCardGroupName>(buildArgs, handCombinations));
+            return new(new HandAnalyzer<TCardGroup, TCardGroupName>(buildArgs, handCombinations));
+        }
+
+        protected virtual Stream LoadFromCache(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
+        {
+            return new FileStream($"cache/{buildArgs.AnalyzerName}.json", FileMode.Open, FileAccess.Read);
         }
 
         protected abstract TCardGroupName ConvertCardNameFromString(string cardName);
