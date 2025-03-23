@@ -4,12 +4,19 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<Version>1.2.5</Version>
+		<Title>YGO Hand Analysis Framework</Title>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
 		<PackageReference Include="SharpCompress" Version="0.39.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="../readme.md" Pack="true" PackagePath="\"/>
 	</ItemGroup>
 
 </Project>
