@@ -85,16 +85,15 @@ public sealed class SmallWorldEfficiencyProject<TCardGroup, TCardGroupName> : IP
                 return false;
             }
 
-            var foundSmallWorldCard = false;
             foreach(var card in hand.GetCardsInHand(analyzer))
             {
-                if(card.SmallWorldTraits is not null)
+                if(card.CanBeBanished && card.SmallWorldTraits is not null)
                 {
-                    foundSmallWorldCard = true;
+                    return true;
                 }
             }
 
-            return foundSmallWorldCard;
+            return false;
         });
     }
 
