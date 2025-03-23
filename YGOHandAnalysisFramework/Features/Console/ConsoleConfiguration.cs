@@ -74,13 +74,13 @@ public static class ConsoleConfiguration
                 }
 
                 System.Console.WriteLine("Building analyzers.");
-                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet(), componentsLoader.CreateCacheLoader());
+                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet(), componentsLoader.CreateCacheLoader(config));
                 System.Console.WriteLine("Completed building analyzers.");
                 System.Console.WriteLine();
 
                 System.Console.WriteLine("Running projects.");
-                var handler = componentsLoader.CreateProjectHandler();
-                handler.RunProjects(componentsLoader.CreateProjects(), analyzersCollection, config);
+                var handler = componentsLoader.CreateProjectHandler(config);
+                handler.RunProjects(componentsLoader.CreateProjects(config), analyzersCollection, config);
                 System.Console.WriteLine("Completed running projects.");
 
                 return 0;
@@ -234,6 +234,7 @@ public sealed class ConsoleConfiguration<TCardGroupName> : IConfiguration<TCardG
     public IEnumerable<int> HandSizes { get; }
     public bool CreateWeightedProbabilities { get; }
     public bool UseCache { get; }
+    public string CacheLocation { get; }
 
     public ConsoleConfiguration(ConsoleOptions consoleOptions, IEnumerable<IConfigurationDeckList<TCardGroupName>> deckLists)
     {
@@ -241,6 +242,7 @@ public sealed class ConsoleConfiguration<TCardGroupName> : IConfiguration<TCardG
         HandSizes = consoleOptions.HandSizes.ToArray();
         CreateWeightedProbabilities = consoleOptions.CreateWeightedProbabilities;
         UseCache = consoleOptions.UseCache;
+        CacheLocation = consoleOptions.CacheLocation;
 
         DeckLists = deckLists.ToList();
         OutputStream = new HandAnalyzerConsoleOutputStream();

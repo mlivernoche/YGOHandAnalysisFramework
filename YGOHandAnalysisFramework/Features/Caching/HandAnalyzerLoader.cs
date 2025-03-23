@@ -11,15 +11,34 @@ namespace YGOHandAnalysisFramework.Features.Caching
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
+        public string WorkingDirectory { get; }
+
+        protected HandAnalyzerLoader()
+        {
+            WorkingDirectory = Environment.CurrentDirectory;
+        }
+
+        protected HandAnalyzerLoader(string workingDirectory)
+        {
+            WorkingDirectory = workingDirectory;
+        }
+
         internal Result<HandAnalyzer<TCardGroup, TCardGroupName>, Exception> TryLoadHandAnalyzer(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
         {
-            using var source = LoadFromCache(buildArgs);
-            if (!TryLoadFromCache(source, buildArgs).GetResult(out var handAnalyzer, out var error))
+            if(!LoadFromCache(buildArgs).GetResult(out var source, out var fileError))
             {
-                return new(error);
+                return new(fileError);
             }
 
-            return new(handAnalyzer);
+            using (source)
+            {
+                if (!TryLoadFromCache(source, buildArgs).GetResult(out var handAnalyzer, out var jsonError))
+                {
+                    return new(jsonError);
+                }
+
+                return new(handAnalyzer);
+            }
         }
 
         internal void CreateCache(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
@@ -67,9 +86,8 @@ namespace YGOHandAnalysisFramework.Features.Caching
                 CardGroups = [.. cardGroups],
                 HandCombinations = [.. handCombinations],
             };
-
             var json = JsonSerializer.Serialize(cache);
-            File.WriteAllText($"{handAnalyzer.AnalyzerName}.json", json);
+            WriteToCache(handAnalyzer, json);
         }
 
         internal void CreateCache(IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers)
@@ -135,9 +153,21 @@ namespace YGOHandAnalysisFramework.Features.Caching
             return new(new HandAnalyzer<TCardGroup, TCardGroupName>(buildArgs, handCombinations));
         }
 
-        protected virtual Stream LoadFromCache(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
+        protected virtual Result<Stream, Exception> LoadFromCache(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArgs)
         {
-            return new FileStream($"cache/{buildArgs.AnalyzerName}.json", FileMode.Open, FileAccess.Read);
+            var path = Path.Combine(WorkingDirectory, $"{buildArgs.AnalyzerName}.json");
+            if (!File.Exists(path))
+            {
+                return new(new FileNotFoundException());
+            }
+
+            return new(new FileStream(path, FileMode.Open, FileAccess.Read));
+        }
+
+        protected virtual void WriteToCache(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, string json)
+        {
+            var path = Path.Combine(WorkingDirectory, $"{handAnalyzer.AnalyzerName}.json");
+            File.WriteAllText(path, json);
         }
 
         protected abstract TCardGroupName ConvertCardNameFromString(string cardName);

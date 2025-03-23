@@ -18,4 +18,7 @@ public class ConsoleOptions
 
     [Option("usecache", Default = false)]
     public bool UseCache { get; set; } = false;
+
+    [Option("cachelocation", Default = "")]
+    public string CacheLocation { get; set; } = string.Empty;
 }

@@ -12,4 +12,5 @@ public interface IConfiguration<TCardGroupName>
     IEnumerable<int> HandSizes { get; }
     bool CreateWeightedProbabilities { get; }
     bool UseCache { get; }
+    string CacheLocation { get; }
 }
