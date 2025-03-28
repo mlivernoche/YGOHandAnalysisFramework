@@ -1,7 +1,7 @@
 ﻿using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Combinations;
 
-namespace YGOHandAnalysisFramework.Data.Extensions;
+namespace YGOHandAnalysisFramework.Data.Extensions.MultipleOK;
 
 public static class MultipleOk
 {
