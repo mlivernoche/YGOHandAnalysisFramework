@@ -4,9 +4,13 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Version>1.2.5</Version>
+		<Version>1.3.5</Version>
 		<Title>YGO Hand Analysis Framework</Title>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<RepositoryUrl>https://github.com/mlivernoche/YGOHandAnalysisFramework.git</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/mlivernoche/YGOHandAnalysisFramework</PackageProjectUrl>
+		<Authors>Matthew Livernoche</Authors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -16,7 +20,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="../readme.md" Pack="true" PackagePath="\"/>
+		<Content Include="../readme.md" Pack="true" PackagePath="" />
+		<Content Include="../LICENSE" Pack="true" PackagePath="" />
 	</ItemGroup>
 
 </Project>
