@@ -17,7 +17,7 @@ public static class CardSearchNode
             return new CardSearchNode<TCardGroupName>(cardNames[currentNode], CreateGraph(currentNode + 1, cardNames));
         }
 
-        return CreateGraph(0, names.ToArray());
+        return CreateGraph(0, [.. names]);
     }
 
     public static CardSearchNode<TCardGroupName> GetLastNode<TCardGroupName>(this CardSearchNode<TCardGroupName> node)

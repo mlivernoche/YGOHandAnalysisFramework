@@ -4,7 +4,10 @@ namespace YGOHandAnalysisFramework.Data.CardSearch;
 
 public static class CardSearchNodeCollection
 {
-    public static CardSearchNodeCollection<TCardGroupName> Add<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, IEnumerable<TCardGroupName> names)
+    /// <summary>
+    /// Add a node to the search graph collection. This is a mutable operation, which means it modifies the graph you provide.
+    /// </summary>
+    public static CardSearchNodeCollection<TCardGroupName> AddNode<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, IEnumerable<TCardGroupName> names)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var graph = CardSearchNode.CreateSearchGraph(names);
@@ -12,18 +15,24 @@ public static class CardSearchNodeCollection
         return collection;
     }
 
-    public static CardSearchNodeCollection<TCardGroupName> Add<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, TCardGroupName start, IEnumerable<TCardGroupName> directSearches)
+    /// <summary>
+    /// Add a node to the search graph collection. This is a mutable operation, which means it modifies the graph you provide.
+    /// </summary>
+    public static CardSearchNodeCollection<TCardGroupName> AddNode<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, TCardGroupName start, IEnumerable<TCardGroupName> directSearches)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         foreach (var direct in directSearches)
         {
-            var graph = CardSearchNode.CreateSearchGraph(new[] { start, direct });
+            var graph = CardSearchNode.CreateSearchGraph([start, direct]);
             collection.Add(graph);
         }
 
         return collection;
     }
 
+    /// <summary>
+    /// Gets all graphs that started with <paramref name="name" />.
+    /// </summary>
     public static IEnumerable<CardSearchNode<TCardGroupName>> GetGraphsByName<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, TCardGroupName name)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -38,6 +47,9 @@ public static class CardSearchNodeCollection
         }
     }
 
+    /// <summary>
+    /// Gets all graphs that end with <paramref name="name" />.
+    /// </summary>
     public static IEnumerable<CardSearchNode<TCardGroupName>> GetGraphsByEnd<TCardGroupName>(this CardSearchNodeCollection<TCardGroupName> collection, TCardGroupName name)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -64,7 +76,6 @@ public static class CardSearchNodeCollection
 /// Diviner of the Herald -> Trias Hierarchia -> DoSolfachord Cutia -> ReSolfachord Dreamia
 /// is also fine.
 /// </summary>
-/// <typeparam name="TCardGroupName"></typeparam>
 public sealed class CardSearchNodeCollection<TCardGroupName> : IEnumerable<CardSearchNode<TCardGroupName>>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
