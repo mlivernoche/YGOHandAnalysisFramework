@@ -1,5 +1,5 @@
 ﻿using YGOHandAnalysisFramework.Data;
-using YGOHandAnalysisFramework.Data.Extensions;
+using YGOHandAnalysisFramework.Data.Extensions.MultipleOK;
 
 namespace YGOHandAnalysisFramework.Projects.NonEngineCounter;
 

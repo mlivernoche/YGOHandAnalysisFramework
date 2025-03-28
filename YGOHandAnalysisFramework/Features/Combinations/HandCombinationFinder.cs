@@ -110,6 +110,10 @@ internal static class HandCombinationFinder
 
         foreach (var handPermutation in permutations)
         {
+            // We fill the hand with empties, because to compare two hands, they must be hashed with the same set of data but differ in their card quantity distribution.
+            // e.g, hand 1 = [a:1, b:0, c:2, d:0, ...]
+            // v.s. hand 2 = [a:0, b:1, c:2, d:1, ...]
+            // sorting is handled by HandCombination<TCardGroupName>
             var handWithEmpties = new HashSet<HandElement<TCardGroupName>>(handPermutation, HandCombinationNameComparer<TCardGroupName>.Default);
             handWithEmpties.UnionWith(emptyHand);
 

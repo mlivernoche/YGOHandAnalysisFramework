@@ -1,4 +1,4 @@
-﻿using YGOHandAnalysisFramework.Data.Extensions;
+﻿using YGOHandAnalysisFramework.Data.Extensions.MultipleOK;
 using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;

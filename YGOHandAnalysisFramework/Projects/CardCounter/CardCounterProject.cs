@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using YGOHandAnalysisFramework.Data.Extensions;
 using YGOHandAnalysisFramework.Data.Operations;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
@@ -8,6 +7,7 @@ using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Features.Comparison.Calculator;
 using YGOHandAnalysisFramework.Features.Configuration;
 using YGOHandAnalysisFramework.Data;
+using YGOHandAnalysisFramework.Data.Extensions.MultipleOK;
 
 namespace YGOHandAnalysisFramework.Projects.CardCounter;
 
