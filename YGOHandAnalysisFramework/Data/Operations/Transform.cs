@@ -6,6 +6,51 @@ namespace YGOHandAnalysisFramework.Data.Operations;
 
 public static class Transform
 {
+
+    /// <summary>
+    /// Get all the cards in <paramref name="cards"/> with a Size greater than 0.
+    /// </summary>
+    /// <returns>All cards present in <paramref name="cards"/> with a Size greater than 0.</returns>
+    public static IEnumerable<HandElement<TCardGroupName>> GetCardsInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        foreach (var element in cards.CardNames)
+        {
+            if (element.MinimumSize == 0)
+            {
+                continue;
+            }
+
+            yield return element;
+        }
+    }
+
+    /// <summary>
+    /// Get all the cards in <paramref name="cards"/> with a Size greater than 0, but return the original <typeparamref name="TCardGroup"/>.
+    /// This is useful for getting data about the card (e.g., attack, defense, other properties, etc.).
+    /// </summary>
+    /// <returns>Each <typeparamref name="TCardGroup"/> from <paramref name="analyzer"/> that is present in <paramref name="cards"/>.</returns>
+    /// <exception cref="Exception">An exception thrown if a <typeparamref name="TCardGroup"/> is not found in <paramref name="analyzer"/>.</exception>
+    public static IEnumerable<TCardGroup> GetCardsInHand<TCardGroup, TCardGroupName>(this HandCombination<TCardGroupName> cards, HandAnalyzer<TCardGroup, TCardGroupName> analyzer)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        foreach (var element in cards.CardNames)
+        {
+            if (element.MinimumSize == 0)
+            {
+                continue;
+            }
+
+            if (!analyzer.CardGroups.TryGetValue(element.HandName, out var group))
+            {
+                throw new Exception($"Card in hand \"{element.HandName}\" not in card list.");
+            }
+
+            yield return group;
+        }
+    }
+
     public static IEnumerable<(TCardGroup, HandElement<TCardGroupName>)> GetCardGroups<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, HandCombination<TCardGroupName> hand)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>

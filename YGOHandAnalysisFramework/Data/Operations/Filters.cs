@@ -1,10 +1,15 @@
-﻿using YGOHandAnalysisFramework.Features.Analysis;
+﻿using CommunityToolkit.Diagnostics;
+using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 
 namespace YGOHandAnalysisFramework.Data.Operations;
 
 public static class Filters
 {
+    /// <summary>
+    /// Checks whether <paramref name="analyzer" /> contains a card with the name <paramref name="cardName" /> and whose Size is greater than 0.
+    /// </summary>
+    /// <returns>True is <paramref name="cardName" /> is found in <paramref name="analyzer" /> and its Size is greater than 0, otherwise false.</returns>
     public static bool HasCard<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, TCardGroupName cardName)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -17,62 +22,35 @@ public static class Filters
         return group.Size > 0;
     }
 
-    public static IEnumerable<HandElement<TCardGroupName>> GetCardsInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards)
+    /// <summary>
+    /// Check whether <paramref name="hand"/> is only contained of unique <typeparamref name="TCardGroupName"/> card names (all no singles, no duplicates).
+    /// </summary>
+    /// <returns>True if <paramref name="hand"/> only has unique cards, otherwise false.</returns>
+    public static bool OnlyHasSingles<TCardGroupName>(this HandCombination<TCardGroupName> hand)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var element in cards.CardNames)
-        {
-            if (element.MinimumSize == 0)
-            {
-                continue;
-            }
-
-            yield return element;
-        }
-    }
-
-    public static IEnumerable<TCardGroup> GetCardsInHand<TCardGroup, TCardGroupName>(this HandCombination<TCardGroupName> cards, HandAnalyzer<TCardGroup, TCardGroupName> analyzer)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var element in cards.CardNames)
-        {
-            if (element.MinimumSize == 0)
-            {
-                continue;
-            }
-
-            if(!analyzer.CardGroups.TryGetValue(element.HandName, out var group))
-            {
-                throw new Exception($"Card in hand \"{element.HandName}\" not in card list.");
-            }
-
-            yield return group;
-        }
-    }
-
-    private static bool HasCard<TCardGroupName>(HandElement<TCardGroupName> card, IEnumerable<TCardGroupName> contains)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        return card.MinimumSize > 0 && contains.Contains(card.HandName);
-    }
-
-    public static bool OnlyHasSingles<TCardGroupName>(this HandCombination<TCardGroupName> cards)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        return cards
+        return hand
             .CardNames
             .All(static card => card.MinimumSize <= 1);
     }
 
-    public static bool HasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> cards)
+    /// <summary>
+    /// Checks whether <paramref name="hand"/> has at least one set of duplicate <typeparamref name="TCardGroupName"/> card names (can be a pair or a trio).
+    /// </summary>
+    /// <returns>True if <paramref name="hand"/> has at least one set of duplicate <typeparamref name="TCardGroupName"/> card names, otherwise false.</returns>
+    public static bool HasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> hand)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        return cards
+        return hand
             .CardNames
             .Any(static card => card.MinimumSize > 1);
     }
 
+    /// <summary>
+    /// Checks whether <paramref name="cards"/> is ONLY composed of duplicate <typeparamref name="TCardGroupName"/> card names (these can be pairs, but also trios).
+    /// e.g. a hand like 3x "Card A" and 2x "Card B" would return TRUE.
+    /// </summary>
+    /// <returns>True if <paramref name="cards"/> is ONLY composted of duplicate <typeparamref name="TCardGroupName"/> card names, otherwise false.</returns>
     public static bool OnlyHasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> cards)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -82,26 +60,41 @@ public static class Filters
             .All(static card => card.MinimumSize > 1);
     }
 
-    public static bool HasThisCard<TCardGroupName>(this HandCombination<TCardGroupName> cards, TCardGroupName cardName)
+    /// <summary>
+    /// Check whether <paramref name="cardName"/> is present in the <paramref name="hand"/>.
+    /// </summary>
+    /// <returns>True if <paramref name="cardName"/> is in <paramref name="hand"/>, otherwise false.</returns>
+    public static bool HasThisCard<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var card in cards.GetCardsInHand())
+        foreach (var card in hand.CardNames)
         {
             if (card.HandName.Equals(cardName))
             {
-                return true;
+                return card.MinimumSize > 0;
             }
         }
 
         return false;
     }
 
-    public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> cards, IEnumerable<TCardGroupName> cardNames)
+    /// <summary>
+    /// Checks whether ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
+    /// </summary>
+    /// <returns>True if ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>, otherwise false.</returns>
+    public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var card in cards.CardNames)
+        IReadOnlySet<TCardGroupName> cardNamesSet = cardNames is IReadOnlySet<TCardGroupName> set ? set : cardNames.ToHashSet();
+
+        foreach (var card in hand.CardNames)
         {
-            if (HasCard(card, cardNames))
+            if(card.MinimumSize == 0)
+            {
+                continue;
+            }
+
+            if (cardNamesSet.Contains(card.HandName))
             {
                 return true;
             }
@@ -110,20 +103,28 @@ public static class Filters
         return false;
     }
 
-    public static bool HasAllOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> cards, IEnumerable<TCardGroupName> cardNames)
+    /// <summary>
+    /// Checks whether ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
+    /// </summary>
+    /// <returns>True if ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>, otherwise false.</returns>
+    public static bool HasAllOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var filtered = cards.GetCardsInHand().Select(static card => card.HandName);
+        var filtered = hand.GetCardsInHand().Select(static card => card.HandName);
         var set = new HashSet<TCardGroupName>(filtered);
         return set.IsProperSupersetOf(cardNames);
     }
 
-    public static int CountCardNames<TCardGroupName>(this HandCombination<TCardGroupName> cards)
+    /// <summary>
+    /// Counts the amount of unique card names in <paramref name="hand"/>
+    /// </summary>
+    /// <returns>The amount of unique card names in <paramref name="hand"/>.</returns>
+    public static int CountCardNames<TCardGroupName>(this HandCombination<TCardGroupName> hand)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var count = 0;
 
-        foreach (var card in cards.GetCardsInHand())
+        foreach (var card in hand.GetCardsInHand())
         {
             count++;
         }
@@ -131,15 +132,21 @@ public static class Filters
         return count;
     }
 
-    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards, TCardGroupName cardName)
+    /// <summary>
+    /// Counts the amount of copies of <paramref name="cardName"/> in <paramref name="hand"/>.
+    /// </summary>
+    /// <returns>The amount of copies of <paramref name="cardName"/> in <paramref name="hand"/>.</returns>
+    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach(var card in cards.CardNames)
+        foreach(var card in hand.CardNames)
         {
             if(!card.HandName.Equals(cardName))
             {
                 continue;
             }
+
+            Guard.IsGreaterThanOrEqualTo(card.MinimumSize, 0);
 
             return card.MinimumSize;
         }
@@ -147,60 +154,21 @@ public static class Filters
         return 0;
     }
 
-    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards, IEnumerable<TCardGroupName> cardNames)
+    /// <summary>
+    /// Counts the total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.
+    /// </summary>
+    /// <returns>The total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.</returns>
+    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var total = 0;
 
         foreach(var card in cardNames)
         {
-            total += cards.CountCopiesOfCardInHand(card);
+            total += hand.CountCopiesOfCardInHand(card);
         }
 
         return total;
-    }
-
-    public static int CountCardNameInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards, TCardGroupName cardName)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-
-        foreach (var card in cards.CardNames)
-        {
-            if (!card.HandName.Equals(cardName))
-            {
-                continue;
-            }
-
-            return 1;
-        }
-
-        return 0;
-    }
-
-    /// <summary>
-    /// Counts each individual card names, but not their duplicates. For example, if there are
-    /// two copies of a card, that isn't counted as two, but one.
-    /// </summary>
-    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
-    /// <param name="cards">The hand to analyze.</param>
-    /// <param name="cardNames">The cards to look for.</param>
-    /// <returns>The amount of names found (this number does not include duplicates).</returns>
-    public static int CountCardNamesInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards, IEnumerable<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var count = 0;
-
-        foreach(var card in cards.CardNames)
-        {
-            if(!HasCard(card, cardNames))
-            {
-                continue;
-            }
-
-            count++;
-        }
-
-        return count;
     }
 
     public static IEnumerable<TCard> FilterByName<TCard, TCardGroupName, TValue>(this IReadOnlyDictionary<TCardGroupName, TValue> cards, IEnumerable<TCard> names)
