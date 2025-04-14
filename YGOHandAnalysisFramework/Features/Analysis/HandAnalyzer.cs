@@ -187,7 +187,8 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// <para>Calculates the probability of drawing all hands that match <paramref name="filter"/>.</para>
+    /// <para>You can also access <paramref name="args"/> in <paramref name="filter"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -216,7 +217,8 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// <para>Calculates the probability of drawing all hands that match <paramref name="filter"/>.</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> in <paramref name="filter"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -243,7 +245,8 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// <para>Calculates the probability of drawing all hands that match <paramref name="filter"/>.</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> and <paramref name="args"/> in <paramref name="filter"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -316,8 +319,9 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
-    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// <para>Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.</para>
+    /// <para>You can also access <paramref name="args"/> in <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -346,8 +350,9 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
-    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// <para>Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> in <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -374,8 +379,9 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
-    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// <para>Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> and <paramref name="args"/> in <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -450,6 +456,7 @@ public static class HandAnalyzer
     /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// <para>You can also access <paramref name="args"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -491,6 +498,7 @@ public static class HandAnalyzer
     /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
@@ -530,6 +538,7 @@ public static class HandAnalyzer
     /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// <para>You can also access <paramref name="handAnalyzer"/> and <paramref name="args"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
