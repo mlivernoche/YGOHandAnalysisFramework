@@ -8,11 +8,13 @@ using YGOHandAnalysisFramework.Features.Probability;
 using YGOHandAnalysisFramework.Features.Assessment;
 using YGOHandAnalysisFramework.Features.Caching;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
+using System.Diagnostics.Contracts;
 
 namespace YGOHandAnalysisFramework.Features.Analysis;
 
 public static class HandAnalyzer
 {
+    [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -20,6 +22,7 @@ public static class HandAnalyzer
         return new HandAnalyzer<TCardGroup, TCardGroupName>(buildArguments);
     }
 
+    [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -35,6 +38,7 @@ public static class HandAnalyzer
         return handAnalyzer;
     }
 
+    [Pure]
     public static IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -64,6 +68,7 @@ public static class HandAnalyzer
         return analyzers;
     }
 
+    [Pure]
     public static IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateInParallel<TCardGroup, TCardGroupName>(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArguments)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -86,6 +91,7 @@ public static class HandAnalyzer
         return analyzerByBuildArgs;
     }
 
+    [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Excavate<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> originalAnalyzer, HandCombination<TCardGroupName> hand)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -99,6 +105,7 @@ public static class HandAnalyzer
         return Create(args);
     }
 
+    [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Excavate<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> originalAnalyzer, HandCombination<TCardGroupName> hand, int handSize)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -111,6 +118,7 @@ public static class HandAnalyzer
         return Create(args);
     }
 
+    [Pure]
     private static IEnumerable<HandCombination<TCardGroupName>> Filter<TCardGroup, TCardGroupName>(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -124,6 +132,7 @@ public static class HandAnalyzer
         }
     }
 
+    [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -131,6 +140,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, Filter(handAnalyzer, filter), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -149,6 +159,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -167,6 +178,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -174,6 +186,7 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, hand, handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -192,6 +205,7 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -210,6 +224,7 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -240,6 +255,7 @@ public static class HandAnalyzer
     /// <param name="args">Any relevant for the valueFunction.</param>
     /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
     /// <returns>The summation of each return value from valueFunction applied to each hand multipled by the probability of drawing that hand.</returns>
+    [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -258,6 +274,7 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    [Pure]
     public static double Aggregate<TCardGroup, TCardGroupName, TAggregate>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, TAggregate> aggregator, Func<IReadOnlyDictionary<HandCombination<TCardGroupName>, TAggregate>, double> calculator)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -272,6 +289,7 @@ public static class HandAnalyzer
         return calculator(aggregateValues);
     }
 
+    [Pure]
     public static double Aggregate<TCardGroup, TCardGroupName, TAggregate>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAggregate> aggregator, Func<IReadOnlyDictionary<HandCombination<TCardGroupName>, TAggregate>, double> calculator)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
