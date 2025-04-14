@@ -117,20 +117,13 @@ public static class HandAnalyzer
         return Create(args);
     }
 
-    [Pure]
-    private static IEnumerable<HandCombination<TCardGroupName>> Filter<TCardGroup, TCardGroupName>(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var hand in analyzer.Combinations)
-        {
-            if (filter(analyzer, hand))
-            {
-                yield return hand;
-            }
-        }
-    }
-
+    /// <summary>
+    /// Calculates the probability of drawing all possible hands.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <returns>The probability of drawing all possible hands.</returns>
     [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -139,6 +132,30 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, handAnalyzer.Combinations, handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    /// <summary>
+    /// Calculates the probability of drawing <paramref name="hand"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="hand">The hand whose probability is being calculated.</param>
+    /// <returns>The probability of drawing <paramref name="hand"/>.</returns>
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, hand, handAnalyzer.DeckSize, handAnalyzer.HandSize);
+    }
+
+    /// <summary>
+    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="filter">The filter, which determines which hands to include and not.</param>
+    /// <returns>The probability of drawing all hands that match <paramref name="filter"/>.</returns>
     [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -147,55 +164,23 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, handAnalyzer.Combinations.Where(filter), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
-    [Pure]
-    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, IFilter<HandCombination<TCardGroupName>> filter)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, filter.GetResults(handAnalyzer.Combinations), handAnalyzer.DeckSize, handAnalyzer.HandSize);
-    }
-
-    [Pure]
-    public static double CalculateProbability<TCardGroup, TCardGroupName, TFilter>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TFilter filter)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-        where TFilter : struct, IFilter<HandCombination<TCardGroupName>>
-    {
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, filter.GetResults(handAnalyzer.Combinations), handAnalyzer.DeckSize, handAnalyzer.HandSize);
-    }
-
-    [Pure]
-    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, Filter(handAnalyzer, filter), handAnalyzer.DeckSize, handAnalyzer.HandSize);
-    }
-
-    [Pure]
-    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, bool> filter)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        IEnumerable<HandCombination<TCardGroupName>> GetCombinations()
-        {
-            foreach (var hand in handAnalyzer.Combinations)
-            {
-                if (filter(handAnalyzer, hand, args))
-                {
-                    yield return hand;
-                }
-            }
-        }
-
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
-    }
-
+    /// <summary>
+    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The type of the data being passed to <paramref name="filter"/>.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">The data being passed to <paramref name="filter"/>.</param>
+    /// <param name="filter">The filter, which determines which hands to include and not.</param>
+    /// <returns>The probability of drawing all hands that match <paramref name="filter"/>.</returns>
     [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+
         IEnumerable<HandCombination<TCardGroupName>> GetCombinations()
         {
             foreach (var hand in handAnalyzer.Combinations)
@@ -206,16 +191,78 @@ public static class HandAnalyzer
                 }
             }
         }
-
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    /// <summary>
+    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="filter">The filter, which determines which hands to include and not.</param>
+    /// <returns>The probability of drawing all hands that match <paramref name="filter"/>.</returns>
     [Pure]
-    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand)
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, hand, handAnalyzer.DeckSize, handAnalyzer.HandSize);
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+
+        IEnumerable<HandCombination<TCardGroupName>> GetCombinations()
+        {
+            foreach (var hand in handAnalyzer.Combinations)
+            {
+                if (filter(handAnalyzer, hand))
+                {
+                    yield return hand;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The type of the data being passed to <paramref name="filter"/>.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">The data being passed to <paramref name="filter"/>.</param>
+    /// <param name="filter">The filter, which determines which hands to include and not.</param>
+    /// <returns>The probability of drawing all hands that match <paramref name="filter"/>.</returns>
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, bool> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, GetCombinations(), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+
+        IEnumerable<HandCombination<TCardGroupName>> GetCombinations()
+        {
+            foreach (var hand in handAnalyzer.Combinations)
+            {
+                if (filter(handAnalyzer, hand, args))
+                {
+                    yield return hand;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="filter">The filter, which determines which hands to include and not.</param>
+    /// <returns>The probability of drawing all hands that match <paramref name="filter"/>.</returns>
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, IFilter<HandCombination<TCardGroupName>> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, filter.GetResults(handAnalyzer.Combinations), handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
     /// <summary>
