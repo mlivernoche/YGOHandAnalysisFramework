@@ -224,13 +224,11 @@ public static class HandAnalyzer
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
-    /// <typeparam name="TArgs">The data type being used in the valueFunction.</typeparam>
     /// <param name="handAnalyzer">The hand analyzer.</param>
-    /// <param name="args">Any relevant for the valueFunction.</param>
-    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <param name="valueSelector">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
     /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, double> valueFunction)
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, double> valueSelector)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -238,7 +236,37 @@ public static class HandAnalyzer
 
         foreach (var hand in handAnalyzer.Combinations)
         {
-            var value = valueFunction(hand, args);
+            var value = valueSelector(hand);
+            if (value > 0)
+            {
+                expectedValue += handAnalyzer.CalculateProbability(hand) * value;
+            }
+        }
+
+        return expectedValue;
+    }
+
+    /// <summary>
+    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The data type being used in <paramref name="valueSelector"/>.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">Any relevant data for <paramref name="valueSelector"/>.</param>
+    /// <param name="valueSelector">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
+    [Pure]
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, double> valueSelector)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var expectedValue = 0.0;
+
+        foreach (var hand in handAnalyzer.Combinations)
+        {
+            var value = valueSelector(hand, args);
             if (value > 0)
             {
                 expectedValue += handAnalyzer.CalculateProbability(hand) * value;
@@ -255,10 +283,10 @@ public static class HandAnalyzer
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <param name="handAnalyzer">The hand analyzer.</param>
-    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <param name="valueSelector">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
     /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, double> valueFunction)
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, double> valueSelector)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -266,7 +294,7 @@ public static class HandAnalyzer
 
         foreach (var hand in handAnalyzer.Combinations)
         {
-            var value = valueFunction(hand);
+            var value = valueSelector(handAnalyzer, hand);
             if (value > 0)
             {
                 expectedValue += handAnalyzer.CalculateProbability(hand) * value;
@@ -282,11 +310,13 @@ public static class HandAnalyzer
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The data type being used in <paramref name="valueSelector"/>.</typeparam>
     /// <param name="handAnalyzer">The hand analyzer.</param>
-    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <param name="args">Any relevant data for <paramref name="valueSelector"/>.</param>
+    /// <param name="valueSelector">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
     /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, double> valueFunction)
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, double> valueSelector)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -294,37 +324,7 @@ public static class HandAnalyzer
 
         foreach (var hand in handAnalyzer.Combinations)
         {
-            var value = valueFunction(handAnalyzer, hand);
-            if (value > 0)
-            {
-                expectedValue += handAnalyzer.CalculateProbability(hand) * value;
-            }
-        }
-
-        return expectedValue;
-    }
-
-    /// <summary>
-    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
-    /// The return value of this function is the summation of each hand multiplied by its draw probability.
-    /// </summary>
-    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
-    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
-    /// <typeparam name="TArgs">The data type being used in the valueFunction.</typeparam>
-    /// <param name="handAnalyzer">The hand analyzer.</param>
-    /// <param name="args">Any relevant for the valueFunction.</param>
-    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
-    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
-    [Pure]
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, double> valueFunction)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var expectedValue = 0.0;
-
-        foreach (var hand in handAnalyzer.Combinations)
-        {
-            var value = valueFunction(handAnalyzer, args, hand);
+            var value = valueSelector(handAnalyzer, args, hand);
             if (value > 0)
             {
                 expectedValue += handAnalyzer.CalculateProbability(hand) * value;
