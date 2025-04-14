@@ -132,6 +132,39 @@ public static class HandAnalyzer
     }
 
     [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, handAnalyzer.Combinations, handAnalyzer.DeckSize, handAnalyzer.HandSize);
+    }
+
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, bool> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, handAnalyzer.Combinations.Where(filter), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+    }
+
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, IFilter<HandCombination<TCardGroupName>> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, filter.GetResults(handAnalyzer.Combinations), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+    }
+
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName, TFilter>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TFilter filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+        where TFilter : struct, IFilter<HandCombination<TCardGroupName>>
+    {
+        return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, filter.GetResults(handAnalyzer.Combinations), handAnalyzer.DeckSize, handAnalyzer.HandSize);
+    }
+
+    [Pure]
     public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -340,27 +373,6 @@ public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFo
         Guard.IsLessThanOrEqualTo(DeckSize, 60, nameof(DeckSize));
 
         Combinations = handCombinations.ToImmutableHashSet();
-    }
-
-    public double CalculateProbability()
-    {
-        return Calculator.CalculateProbability(CardGroups.Values, Combinations, DeckSize, HandSize);
-    }
-
-    public double CalculateProbability(Func<HandCombination<TCardGroupName>, bool> filter)
-    {
-        return Calculator.CalculateProbability(CardGroups.Values, Combinations.Where(filter), DeckSize, HandSize);
-    }
-
-    public double CalculateProbability(IFilter<HandCombination<TCardGroupName>> filter)
-    {
-        return Calculator.CalculateProbability(CardGroups.Values, filter.GetResults(Combinations), DeckSize, HandSize);
-    }
-
-    public double CalculateProbability<TFilter>(TFilter filter)
-        where TFilter : struct, IFilter<HandCombination<TCardGroupName>>
-    {
-        return Calculator.CalculateProbability(CardGroups.Values, filter.GetResults(Combinations), DeckSize, HandSize);
     }
 
     public int CountHands(Func<HandCombination<TCardGroupName>, bool> filter)
