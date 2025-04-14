@@ -4,6 +4,7 @@ using YGOHandAnalysisFramework.Data.Formatting;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Combinations;
 using YGOHandAnalysisFramework.Features.Comparison;
+using YGOHandAnalysisFramework.Features.Probability;
 
 namespace YGOHandAnalysisFramework.Features.Assessment;
 
@@ -167,5 +168,39 @@ public static class HandAssessment
         }
 
         return comparison;
+    }
+
+    public static HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment> AssessHands<TCardGroup, TCardGroupName, TAssessment>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandCombination<TCardGroupName>, TAssessment> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+        where TAssessment : IHandAssessment<TCardGroupName>
+    {
+        var assessments = analyzer.Combinations.Select(filter).ToList();
+        var includedHands = assessments
+            .Where(static assessment => assessment.Included)
+            .Select(static assessment => assessment.Hand);
+        var prob = Calculator.CalculateProbability(analyzer.CardGroups.Values, includedHands, analyzer.DeckSize, analyzer.HandSize);
+
+        return new HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>(analyzer, prob, assessments);
+    }
+
+    public static HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment> AssessHands<TCardGroup, TCardGroupName, TAssessment>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> filter)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+        where TAssessment : IHandAssessment<TCardGroupName>
+    {
+        var assessments = new List<TAssessment>();
+
+        foreach (var hand in analyzer.Combinations)
+        {
+            assessments.Add(filter(hand, analyzer));
+        }
+
+        var includedHands = assessments
+            .Where(static assessment => assessment.Included)
+            .Select(static assessment => assessment.Hand);
+        var prob = Calculator.CalculateProbability(analyzer.CardGroups.Values, includedHands, analyzer.DeckSize, analyzer.HandSize);
+
+        return new HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>(analyzer, prob, assessments);
     }
 }
