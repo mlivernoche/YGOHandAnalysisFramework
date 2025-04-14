@@ -403,12 +403,12 @@ public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFo
         return $"Analyzer: {AnalyzerName}. Cards: {DeckSize:N0}. Hand Size: {HandSize:N0}. Possible Hands: {Combinations.Count:N0}.";
     }
 
-    public double Calculate(Func<HandAnalyzer<TCardGroup, TCardGroupName>, double> selector)
+    double ICalculator<HandAnalyzer<TCardGroup, TCardGroupName>>.Calculate(Func<HandAnalyzer<TCardGroup, TCardGroupName>, double> selector)
     {
         return selector(this);
     }
 
-    public double Calculate<TArgs>(TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, double> selector)
+    double ICalculator<HandAnalyzer<TCardGroup, TCardGroupName>>.Calculate<TArgs>(TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, double> selector)
     {
         return selector(this, args);
     }
