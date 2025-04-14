@@ -316,7 +316,7 @@ public static class HandAnalyzer
     /// <param name="valueSelector">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
     /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
-    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, double> valueSelector)
+    public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, double> valueSelector)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -324,7 +324,7 @@ public static class HandAnalyzer
 
         foreach (var hand in handAnalyzer.Combinations)
         {
-            var value = valueSelector(handAnalyzer, args, hand);
+            var value = valueSelector(handAnalyzer, hand, args);
             if (value > 0)
             {
                 expectedValue += handAnalyzer.CalculateProbability(hand) * value;
