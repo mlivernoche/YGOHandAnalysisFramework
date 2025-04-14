@@ -53,8 +53,8 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
             {
                 comparison = comparison.AddCategory(compositionCategory.Name, PercentFormat<double>.Default, new ExpectedValueFunctionContext(compositionCategory, EqualityComparer), static (analyzer, context) =>
                 {
-                    var ev = analyzer.Calculate(context, static (analyzer, context) => analyzer.CalculateExpectedValue(context, CalculateExpectedValueOfCategory));
-                    var effectiveEV = analyzer.Calculate(context, static (analyzer, context) => analyzer.CalculateExpectedValue(context, CalculateEffectiveExpectedValueOfCategory));
+                    var ev = analyzer.CalculateExpectedValue(context, CalculateExpectedValueOfCategory);
+                    var effectiveEV = analyzer.CalculateExpectedValue(context, CalculateEffectiveExpectedValueOfCategory);
 
                     if (ev == 0.0)
                     {
@@ -62,8 +62,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
                     }
 
                     return effectiveEV / ev;
-                },
-                compositionCategory.ValueComparer);
+                }, compositionCategory.ValueComparer);
             }
 
             comparison
@@ -102,7 +101,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
     {
         static double CalculateExpectedValue(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, ExpectedValueFunctionContext context)
         {
-            return analyzer.CalculateExpectedValue(context, static (analyzer, context, hand) =>
+            return analyzer.CalculateExpectedValue(context, static (analyzer, hand, context) =>
             {
                 var included = 0;
                 var (comparer, category) = (context.EqualityComparer, context.Category);
@@ -135,7 +134,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
     {
         static double CalculateExpectedValue(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, ExpectedValueFunctionContext context)
         {
-            return analyzer.CalculateExpectedValue(context, static (analyzer, context, hand) =>
+            return analyzer.CalculateExpectedValue(context, static (analyzer, hand, context) =>
             {
                 var included = 0;
 
@@ -163,7 +162,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
             .AddCategory("Net Effective Hand Size", CardinalFormat<double>.Default, (HandCompositionCategories, EqualityComparer), static (analyzer, context) => analyzer.Calculate(context, CalculateEffectiveHandSizeWithCardEconomy), HandAnalyzerComparison.GetDescendingComparer<double>());
     }
 
-    private static double CalculateExpectedValueOfCategory(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, ExpectedValueFunctionContext context, HandCombination<TCardGroupName> hand)
+    private static double CalculateExpectedValueOfCategory(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, HandCombination<TCardGroupName> hand, ExpectedValueFunctionContext context)
     {
         var included = 0;
         var (comparer, category) = (context.EqualityComparer, context.Category);
@@ -179,7 +178,7 @@ public class HandCompositionProject<TCardGroup, TCardGroupName, TCategory> : IPr
         return included;
     }
 
-    private static double CalculateEffectiveExpectedValueOfCategory(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, ExpectedValueFunctionContext context, HandCombination<TCardGroupName> hand)
+    private static double CalculateEffectiveExpectedValueOfCategory(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, HandCombination<TCardGroupName> hand, ExpectedValueFunctionContext context)
     {
         var included = 0;
 
