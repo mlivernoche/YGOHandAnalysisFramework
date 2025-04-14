@@ -97,14 +97,17 @@ internal static class HandCombinationFinder
         var start = new Stack<HandElement<TCardGroupName>>(cardGroups);
         Recursive(startingHandSize, stack, permutations, start);
 
-        var emptyHand = cardGroups
-            .Select(static permutation => new HandElement<TCardGroupName>
+        var emptyHand = new HashSet<HandElement<TCardGroupName>>(cardGroups.Count);
+
+        foreach(var card in cardGroups)
             {
-                HandName = permutation.HandName,
+            emptyHand.Add(new HandElement<TCardGroupName>()
+            {
+                HandName = card.HandName,
                 MinimumSize = 0,
-                MaximumSize = permutation.MaximumSize,
-            })
-            .ToHashSet();
+                MaximumSize = card.MaximumSize,
+            });
+        }
 
         var completeSet = new List<HandCombination<TCardGroupName>>();
 
@@ -115,7 +118,11 @@ internal static class HandCombinationFinder
             // v.s. hand 2 = [a:0, b:1, c:2, d:1, ...]
             // sorting is handled by HandCombination<TCardGroupName>
             var handWithEmpties = new HashSet<HandElement<TCardGroupName>>(handPermutation, HandCombinationNameComparer<TCardGroupName>.Default);
-            handWithEmpties.UnionWith(emptyHand);
+            
+            foreach(var empty in emptyHand)
+            {
+                handWithEmpties.Add(empty);
+            }
 
             completeSet.Add(new HandCombination<TCardGroupName>(handWithEmpties));
         }
