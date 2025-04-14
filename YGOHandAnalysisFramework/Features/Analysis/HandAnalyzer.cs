@@ -218,6 +218,17 @@ public static class HandAnalyzer
         return Calculator.CalculateProbability(handAnalyzer.CardGroups.Values, hand, handAnalyzer.DeckSize, handAnalyzer.HandSize);
     }
 
+    /// <summary>
+    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The data type being used in the valueFunction.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">Any relevant for the valueFunction.</param>
+    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -237,6 +248,15 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    /// <summary>
+    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -256,6 +276,15 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    /// <summary>
+    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
+    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
@@ -276,17 +305,16 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// Calculates the Expected Value (EV) of all hands. For each hand, take
-    /// the return value multiplied by the probability of drawing that hand. The return
-    /// value of this function is the summation of each hand multiplied by its draw probability.
+    /// Calculates the Expected Value (EV) of all hands. For each hand, take the return value multiplied by the probability of drawing that hand.
+    /// The return value of this function is the summation of each hand multiplied by its draw probability.
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <typeparam name="TArgs">The data type being used in the valueFunction.</typeparam>
-    /// <param name="handAnalyzer">The HandAnalyzer.</param>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
     /// <param name="args">Any relevant for the valueFunction.</param>
     /// <param name="valueFunction">The return value for each hand. Each value is multiplied by the probability of drawing that hand.</param>
-    /// <returns>The summation of each return value from valueFunction applied to each hand multipled by the probability of drawing that hand.</returns>
+    /// <returns>The summation of each return value from valueFunction applied to each hand multiplied by the probability of drawing that hand.</returns>
     [Pure]
     public static double CalculateExpectedValue<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, TArgs, HandCombination<TCardGroupName>, double> valueFunction)
         where TCardGroup : ICardGroup<TCardGroupName>
