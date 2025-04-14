@@ -13,13 +13,13 @@ internal sealed class HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, T
     where TAssessment : IHandAssessment<TCardGroupName>
 {
     private AssessmentCache<TCardGroup, TCardGroupName, TAssessment> Cache { get; }
-    private Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> AssessmentFactory { get; }
+    private Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> AssessmentFactory { get; }
     private Func<HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>, TReturn> Function { get; }
 
     public HandAssessmentWithAnalyzerComparisonCategory(
         string name,
         IFormat<TReturn> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         Func<HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>, TReturn> func,
         AssessmentCache<TCardGroup, TCardGroupName, TAssessment> cache,
         Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> optimizer)
@@ -33,7 +33,7 @@ internal sealed class HandAssessmentWithAnalyzerComparisonCategory<TCardGroup, T
     public HandAssessmentWithAnalyzerComparisonCategory(
         string name,
         IFormat<TReturn> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         Func<HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>, TReturn> func,
         AssessmentCache<TCardGroup, TCardGroupName, TAssessment> cache)
         : this(name, formatter, assessmentFactory, func, cache, static analyzer => analyzer) { }

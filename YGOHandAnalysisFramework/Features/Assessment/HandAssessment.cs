@@ -103,7 +103,7 @@ public static class HandAssessment
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
         IFormat<TReturn> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         Func<HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>, TReturn> func)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -118,7 +118,7 @@ public static class HandAssessment
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         string categoryName,
         IFormat<double> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         Func<TAssessment, bool> predicate)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -132,7 +132,7 @@ public static class HandAssessment
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TReturn, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<TReturn> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         params (string Name, Func<HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>, TReturn> Method)[] func)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -153,7 +153,7 @@ public static class HandAssessment
     public static DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> AddAssessment<TCardGroup, TCardGroupName, TAssessment>(
         this DataComparison<HandAnalyzer<TCardGroup, TCardGroupName>> comparison,
         IFormat<double> formatter,
-        Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> assessmentFactory,
+        Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory,
         params (string Name, Func<TAssessment, bool> Predicate)[] func)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -184,7 +184,7 @@ public static class HandAssessment
         return new HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>(analyzer, prob, assessments);
     }
 
-    public static HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment> AssessHands<TCardGroup, TCardGroupName, TAssessment>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandCombination<TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>, TAssessment> filter)
+    public static HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment> AssessHands<TCardGroup, TCardGroupName, TAssessment>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> filter)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
         where TAssessment : IHandAssessment<TCardGroupName>
@@ -193,7 +193,7 @@ public static class HandAssessment
 
         foreach (var hand in analyzer.Combinations)
         {
-            assessments.Add(filter(hand, analyzer));
+            assessments.Add(filter(analyzer, hand));
         }
 
         var includedHands = assessments
