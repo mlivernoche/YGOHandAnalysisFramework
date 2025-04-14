@@ -334,6 +334,166 @@ public static class HandAnalyzer
         return expectedValue;
     }
 
+    /// <summary>
+    /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
+    /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
+    /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
+    /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
+    /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
+    /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="filter">The filter F. This creates subset B of A, B = F(A).</param>
+    /// <param name="valueSelector">The value corresponding to the hand. This can be the number of trap cards, the number of starters, etc. This get multiplied by the probability of drawing the hand.</param>
+    /// <returns>EV(B), B = F(A).</returns>
+    [Pure]
+    public static double CalculateExpectedValueOfSubset<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, bool> filter, Func<HandCombination<TCardGroupName>, double> valueSelector)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var ev = 0.0;
+        var totalProb = 0.0;
+
+        foreach (var hand in handAnalyzer.Combinations)
+        {
+            if (!filter(hand))
+            {
+                continue;
+            }
+
+            var numberOfTraps = valueSelector(hand);
+            var prob = handAnalyzer.CalculateProbability(hand);
+            totalProb += prob;
+            ev += prob * numberOfTraps;
+        }
+
+        return ev / totalProb;
+    }
+
+    /// <summary>
+    /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
+    /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
+    /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
+    /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
+    /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
+    /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The type of <paramref name="args"/>.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">Any relevant for <paramref name="filter"/> and <paramref name="valueSelector"/>.</param>
+    /// <param name="filter">The filter F. This creates subset B of A, B = F(A).</param>
+    /// <param name="valueSelector">The value corresponding to the hand. This can be the number of trap cards, the number of starters, etc. This get multiplied by the probability of drawing the hand.</param>
+    /// <returns>EV(B), B = F(A).</returns>
+    [Pure]
+    public static double CalculateExpectedValueOfSubset<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandCombination<TCardGroupName>, TArgs, bool> filter, Func<HandCombination<TCardGroupName>, TArgs, double> valueSelector)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var ev = 0.0;
+        var totalProb = 0.0;
+
+        foreach (var hand in handAnalyzer.Combinations)
+        {
+            if (!filter(hand, args))
+            {
+                continue;
+            }
+
+            var numberOfTraps = valueSelector(hand, args);
+            var prob = handAnalyzer.CalculateProbability(hand);
+            totalProb += prob;
+            ev += prob * numberOfTraps;
+        }
+
+        return ev / totalProb;
+    }
+
+    /// <summary>
+    /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
+    /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
+    /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
+    /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
+    /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
+    /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="filter">The filter F. This creates subset B of A, B = F(A).</param>
+    /// <param name="valueSelector">The value corresponding to the hand. This can be the number of trap cards, the number of starters, etc. This get multiplied by the probability of drawing the hand.</param>
+    /// <returns>EV(B), B = F(A).</returns>
+    [Pure]
+    public static double CalculateExpectedValueOfSubset<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, bool> filter, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, double> valueSelector)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var ev = 0.0;
+        var totalProb = 0.0;
+
+        foreach (var hand in handAnalyzer.Combinations)
+        {
+            if (!filter(handAnalyzer, hand))
+            {
+                continue;
+            }
+
+            var numberOfTraps = valueSelector(handAnalyzer, hand);
+            var prob = handAnalyzer.CalculateProbability(hand);
+            totalProb += prob;
+            ev += prob * numberOfTraps;
+        }
+
+        return ev / totalProb;
+    }
+
+    /// <summary>
+    /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
+    /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
+    /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
+    /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
+    /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
+    /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <typeparam name="TArgs">The type of <paramref name="args"/>.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="args">Any relevant for <paramref name="filter"/> and <paramref name="valueSelector"/>.</param>
+    /// <param name="filter">The filter F. This creates subset B of A, B = F(A).</param>
+    /// <param name="valueSelector">The value corresponding to the hand. This can be the number of trap cards, the number of starters, etc. This get multiplied by the probability of drawing the hand.</param>
+    /// <returns>EV(B), B = F(A).</returns>
+    [Pure]
+    public static double CalculateExpectedValueOfSubset<TCardGroup, TCardGroupName, TArgs>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TArgs args, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, bool> filter, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TArgs, double> valueSelector)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var ev = 0.0;
+        var totalProb = 0.0;
+
+        foreach (var hand in handAnalyzer.Combinations)
+        {
+            if (!filter(handAnalyzer, hand, args))
+            {
+                continue;
+            }
+
+            var numberOfTraps = valueSelector(handAnalyzer, hand, args);
+            var prob = handAnalyzer.CalculateProbability(hand);
+            totalProb += prob;
+            ev += prob * numberOfTraps;
+        }
+
+        return ev / totalProb;
+    }
+
     [Pure]
     public static double Aggregate<TCardGroup, TCardGroupName, TAggregate>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, Func<HandCombination<TCardGroupName>, TAggregate> aggregator, Func<IReadOnlyDictionary<HandCombination<TCardGroupName>, TAggregate>, double> calculator)
         where TCardGroup : ICardGroup<TCardGroupName>
