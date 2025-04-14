@@ -149,6 +149,28 @@ public static class HandAnalyzer
     }
 
     /// <summary>
+    /// Calculates the probability of drawing <paramref name="hand"/> and <paramref name="probabilityOfOtherEvent"/>, i.e. P(<paramref name="hand"/> and <paramref name="probabilityOfOtherEvent"/>).
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="handAnalyzer">The hand analyzer.</param>
+    /// <param name="hand">The hand whose probability is being calculated.</param>
+    /// <param name="probabilityOfOtherEvent">The probability of another event happening.</param>
+    /// <returns>The probability of drawing <paramref name="hand"/> and <paramref name="probabilityOfOtherEvent"/>.</returns>
+    [Pure]
+    public static double CalculateProbability<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, HandCombination<TCardGroupName> hand, double probabilityOfOtherEvent)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        if(probabilityOfOtherEvent > 0)
+        {
+            return handAnalyzer.CalculateProbability(hand) * probabilityOfOtherEvent;
+        }
+
+        return 0.0;
+    }
+
+    /// <summary>
     /// Calculates the probability of drawing all hands that match <paramref name="filter"/>.
     /// </summary>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
