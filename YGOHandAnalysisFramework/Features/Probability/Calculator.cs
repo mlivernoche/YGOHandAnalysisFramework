@@ -22,7 +22,7 @@ public static class Calculator
 
         foreach (var handPermutation in handCombinations)
         {
-            var currentCardGroup = new List<ICardGroup<TCardGroupName>>(handPermutation.CardNames.Count);
+            var currentCardGroup = new List<CardGroup<TCardGroupName>>(handPermutation.CardNames.Count);
 
             foreach (var cardGroup in handPermutation.CardNames)
             {
@@ -40,7 +40,7 @@ public static class Calculator
                 });
             }
 
-            var prob = Calculate<ICardGroup<TCardGroupName>, TCardGroupName>(currentCardGroup, deckSize, handSize);
+            var prob = Calculate<CardGroup<TCardGroupName>, TCardGroupName>(currentCardGroup, deckSize, handSize);
             totalProb += prob;
         }
 
@@ -52,7 +52,7 @@ public static class Calculator
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var cardGroupByName = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cardGroups);
-        var currentCardGroup = new List<ICardGroup<TCardGroupName>>(handPermutation.CardNames.Count);
+        var currentCardGroup = new List<CardGroup<TCardGroupName>>(handPermutation.CardNames.Count);
 
         foreach (var cardGroup in handPermutation.CardNames)
         {
@@ -70,10 +70,10 @@ public static class Calculator
             });
         }
 
-        return Calculate<ICardGroup<TCardGroupName>, TCardGroupName>(currentCardGroup, deckSize, handSize);
+        return Calculate<CardGroup<TCardGroupName>, TCardGroupName>(currentCardGroup, deckSize, handSize);
     }
 
-    private static double Calculate<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cardGroups, int deckSize, int handSize)
+    private static double Calculate<TCardGroup, TCardGroupName>(List<TCardGroup> cardGroups, int deckSize, int handSize)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -90,7 +90,7 @@ public static class Calculator
         return top / bottom;
     }
 
-    private static void Validation<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cardGroups, int deckSize, int handSize)
+    private static void Validation<TCardGroup, TCardGroupName>(List<TCardGroup> cardGroups, int deckSize, int handSize)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -128,6 +128,9 @@ public static class Calculator
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
+        var hand = new Stack<CardChance>();
+        return Impl(hand, 0, maxHandSize, cardGroups);
+        
         static double Impl(Stack<CardChance> hand, int currentHandSize, int maxHandSize, Stack<TCardGroup> cardGroups)
         {
             if (cardGroups.Count == 0 || currentHandSize >= maxHandSize)
@@ -160,7 +163,7 @@ public static class Calculator
                 var group = cardGroups.Pop();
                 var probs = 0.0;
 
-                for (var i = group.Minimum; i <= group.Maximum; i++)
+                for (int i = group.Minimum, length = group.Maximum; i <= length; i++)
                 {
                     hand.Push(new CardChance()
                     {
@@ -178,9 +181,6 @@ public static class Calculator
                 return probs;
             }
         }
-
-        var hand = new Stack<CardChance>();
-        return Impl(hand, 0, maxHandSize, cardGroups);
     }
 
     private sealed class CardChance
@@ -209,7 +209,7 @@ public static class Calculator
             return top / bottom;
         }
 
-        static double Factorial(int number)
+        private static double Factorial(int number)
         {
             Guard.HasSizeGreaterThan(FactorialCache, number);
             return FactorialCache[number];
