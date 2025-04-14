@@ -179,6 +179,14 @@ public static class DataComparison
     }
 
     [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> AddCategory<TComparison, TArgs>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, string name, IFormat<double> formatter, TArgs args, Func<TComparison, TArgs, double> func, IComparer<double> comparer)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        var category = new DataComparisonCategoryRanked<ICalculatorWrapper<TComparison>, TArgs, double>(name, formatter, args, (calculator, args) => calculator.Calculate(args, func), comparer);
+        return new DataComparison<ICalculatorWrapper<TComparison>>(comparison, category);
+    }
+
+    [Pure]
     public static DataComparison<TComparison> AddCategory<TComparison, TArgs, TReturn>(this DataComparison<TComparison> comparison, string name, IFormat<TReturn> formatter, TArgs args, Func<TComparison, TArgs, TReturn> func, IComparer<TReturn> comparer, Func<TComparison, TComparison> optimizer)
         where TComparison : IDataComparisonFormatterEntry
     {
