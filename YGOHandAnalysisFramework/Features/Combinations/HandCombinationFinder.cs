@@ -74,14 +74,16 @@ internal static class HandCombinationFinder
             }
 
             var group = start.Pop();
+            var handName = group.HandName;
+            var maxSize = group.MaximumSize;
 
-            for (var i = group.MinimumSize; i <= group.MaximumSize; i++)
+            for (int i = group.MinimumSize, length = group.MaximumSize; i <= length; i++)
             {
                 hand.Push(new HandElement<TCardGroupName>()
                 {
-                    HandName = group.HandName,
+                    HandName = handName,
                     MinimumSize = i,
-                    MaximumSize = group.MaximumSize
+                    MaximumSize = maxSize,
                 });
 
                 Recursive(startingHandSize, hand, storage, start);
@@ -109,7 +111,7 @@ internal static class HandCombinationFinder
             });
         }
 
-        var completeSet = new List<HandCombination<TCardGroupName>>();
+        var completeSet = new List<HandCombination<TCardGroupName>>(permutations.Count);
 
         foreach (var handPermutation in permutations)
         {
