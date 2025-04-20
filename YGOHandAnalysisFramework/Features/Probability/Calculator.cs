@@ -4,7 +4,7 @@ using YGOHandAnalysisFramework.Features.Combinations;
 
 namespace YGOHandAnalysisFramework.Features.Probability;
 
-public static class Calculator
+internal static class Calculator
 {
     internal static double CalculateProbability<TCardGroup, TCardGroupName>(IEnumerable<TCardGroup> cardGroups, IEnumerable<HandCombination<TCardGroupName>> handCombinations, int deckSize, int handSize)
         where TCardGroup : ICardGroup<TCardGroupName>
