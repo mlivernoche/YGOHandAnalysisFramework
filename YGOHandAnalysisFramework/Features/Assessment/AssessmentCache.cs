@@ -11,7 +11,7 @@ internal sealed class AssessmentCache<TCardGroup, TCardGroupName, TAssessment>
     where TAssessment : IHandAssessment<TCardGroupName>
 {
     private ConcurrentDictionary<HandAnalyzer<TCardGroup, TCardGroupName>, HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>> AssessmentAnalyzers { get; } = new();
-    private readonly object _lock = new object();
+    private readonly Lock _lock = new();
 
     public HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment> GetAnalyzer(HandAnalyzer<TCardGroup, TCardGroupName> analyzer, Func<HandAnalyzer<TCardGroup, TCardGroupName>, HandCombination<TCardGroupName>, TAssessment> assessmentFactory)
     {
