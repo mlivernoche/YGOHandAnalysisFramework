@@ -104,6 +104,38 @@ public static class Filters
     }
 
     /// <summary>
+    /// Checks whether ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
+    /// </summary>
+    /// <remarks>This method uses <c>params ReadOnlySpan&lt;&gt;</c>, <see href="https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/#params-collections">which can be better optimized by .NET</see>.</remarks>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="hand">The hand being checked for cards in <paramref name="cardNames"/>.</param>
+    /// <param name="cardNames">The card names being checked in <paramref name="hand"/>.</param>
+    /// <returns>True if ANY of the cards in <paramref name="cardNames"/> are in present in <paramref name="hand"/>, otherwise false.</returns>
+    public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, params ReadOnlySpan<TCardGroupName> cardNames)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        foreach(var card in hand.CardNames)
+        {
+            if(card.MinimumSize == 0)
+            {
+                continue;
+            }
+
+            var cardNameInHand = card.HandName;
+
+            foreach(var cardSearch in cardNames)
+            {
+                if(cardSearch.Equals(cardNameInHand))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Checks whether ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
     /// </summary>
     /// <returns>True if ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>, otherwise false.</returns>
