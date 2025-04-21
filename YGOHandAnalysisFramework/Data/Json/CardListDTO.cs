@@ -45,7 +45,7 @@ public class CardListDTO
 
         foreach (var card in cardList.Cards)
         {
-            cards = cards.Add(CardGroupDTO.Create(card, nameConverter));
+            cards.Add(CardGroupDTO.Create(card, nameConverter));
         }
 
         return CardList.Create(cards);

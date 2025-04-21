@@ -62,10 +62,10 @@ public static class Configuration
                 continue;
             }
 
-            cardsThatAreSupported = cardsThatAreSupported.Add(card);
+            cardsThatAreSupported.Add(card);
         }
 
-        return cardsThatAreSupported;
+        return cardsThatAreSupported.ToReadOnly();
     }
 
     public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>>> CreateAnalyzers<TCardGroupName>(this IConfiguration<TCardGroupName> config, TCardGroupName miscCardGroupName)

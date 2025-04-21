@@ -1,9 +1,8 @@
 ﻿using System.Collections;
-using System.Diagnostics.Contracts;
 
 namespace YGOHandAnalysisFramework.Data;
 
-public class CardGroupCollection<TCardGroup, TCardGroupName> : ICardGroupCollection<TCardGroup, TCardGroupName>
+public sealed class ReadOnlyCardGroupCollection<TCardGroup, TCardGroupName> : ICardGroupCollection<TCardGroup, TCardGroupName>
     where TCardGroup : ICardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
@@ -13,24 +12,14 @@ public class CardGroupCollection<TCardGroup, TCardGroupName> : ICardGroupCollect
 
     public int Count => CardGroups.Count;
 
-    public CardGroupCollection()
+    public ReadOnlyCardGroupCollection()
     {
         CardGroups = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name);
     }
 
-    public CardGroupCollection(IEnumerable<TCardGroup> cardGroups)
+    public ReadOnlyCardGroupCollection(IEnumerable<TCardGroup> cardGroups)
     {
         CardGroups = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cardGroups);
-    }
-
-    public void Add(TCardGroup cardGroup)
-    {
-        CardGroups.AddOrUpdate(cardGroup);
-    }
-
-    public ReadOnlyCardGroupCollection<TCardGroup, TCardGroupName> ToReadOnly()
-    {
-        return new ReadOnlyCardGroupCollection<TCardGroup, TCardGroupName>(this);
     }
 
     public IEnumerator<TCardGroup> GetEnumerator()

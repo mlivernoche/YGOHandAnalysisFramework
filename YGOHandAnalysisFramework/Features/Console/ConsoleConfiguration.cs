@@ -215,10 +215,10 @@ public static class ConsoleConfiguration
 
                 foreach (var card in cards)
                 {
-                    cardGroupCollection = cardGroupCollection.Add(CardGroupDTO.Create(card, cardGroupNameFactory));
+                    cardGroupCollection.Add(CardGroupDTO.Create(card, cardGroupNameFactory));
                 }
 
-                yield return new ConfigurationDeckList<TCardGroupName>(deckDTO.Name, cardGroupCollection);
+                yield return new ConfigurationDeckList<TCardGroupName>(deckDTO.Name, cardGroupCollection.ToReadOnly());
             }
         }
     }
