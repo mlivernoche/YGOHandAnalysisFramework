@@ -13,6 +13,19 @@ public static class CardGroup
             Maximum = maximum,
         };
     }
+
+    public static CardGroup<TCardGroupName> CreateFrom<TCardGroup, TCardGroupName>(TCardGroup cardGroup)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new CardGroup<TCardGroupName>()
+        {
+            Name = cardGroup.Name,
+            Size = cardGroup.Size,
+            Minimum = cardGroup.Minimum,
+            Maximum = cardGroup.Maximum,
+        };
+    }
 }
 
 public class CardGroup<TCardGroupName> : ICardGroup<CardGroup<TCardGroupName>, TCardGroupName>
