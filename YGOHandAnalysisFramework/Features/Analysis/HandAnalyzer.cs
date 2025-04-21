@@ -90,6 +90,18 @@ public static class HandAnalyzer
         return analyzerByBuildArgs;
     }
 
+    /// <summary>
+    /// Produces a new version of <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c> but with <paramref name="hand"/> removed.
+    /// </summary>
+    /// <remarks>
+    /// The hand size of the returned <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c> is the hand size of <paramref name="originalAnalyzer"/>.
+    /// There is another version of <c>Excavate</c> where a different hand size can be specified.
+    /// </remarks>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="originalAnalyzer">The original hand analyzer.</param>
+    /// <param name="hand">The cards in <paramref name="hand"/> will not be present in the returned <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c>, but the rest of the cards from <paramref name="originalAnalyzer"/> will be.</param>
+    /// <returns>A new <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c> based on <paramref name="originalAnalyzer"/> but without the cards in <paramref name="hand"/>.</returns>
     [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Excavate<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> originalAnalyzer, HandCombination<TCardGroupName> hand)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
@@ -104,6 +116,15 @@ public static class HandAnalyzer
         return Create(args);
     }
 
+    /// <summary>
+    /// Produces a new version of <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c> but with <paramref name="hand"/> removed and a hand size of <paramref name="handSize"/>.
+    /// </summary>
+    /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
+    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
+    /// <param name="originalAnalyzer">The original hand analyzer.</param>
+    /// <param name="hand">The cards in <paramref name="hand"/> will not be present in the returned <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c>, but the rest of the cards from <paramref name="originalAnalyzer"/> will be.</param>
+    /// <param name="handSize">The hand size of the returned <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c>.</param>
+    /// <returns>A new <c>HandAnalyzer&lt;TCardGroup, TCardGroupName&gt;</c> based on <paramref name="originalAnalyzer"/> but without the cards in <paramref name="hand"/>. The hand size is <paramref name="handSize"/>.</returns>
     [Pure]
     public static HandAnalyzer<TCardGroup, TCardGroupName> Excavate<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> originalAnalyzer, HandCombination<TCardGroupName> hand, int handSize)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
@@ -410,14 +431,16 @@ public static class HandAnalyzer
     }
 
     /// <summary>
-    /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.
+    /// </summary>
+    /// <remarks>
     /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
     /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
     /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
     /// If A is the set of all hands and EV(A) is its expected value, then B = F(A) and its expected value is EV(B) = EV(F(A)).</para>
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
-    /// </summary>
+    /// </remarks>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <param name="handAnalyzer">The hand analyzer.</param>
@@ -450,6 +473,8 @@ public static class HandAnalyzer
 
     /// <summary>
     /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// </summary>
+    /// <remarks>
     /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
     /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
     /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
@@ -457,7 +482,7 @@ public static class HandAnalyzer
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
     /// <para>You can also access <paramref name="args"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
-    /// </summary>
+    /// </remarks>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <typeparam name="TArgs">The type of <paramref name="args"/>.</typeparam>
@@ -492,6 +517,8 @@ public static class HandAnalyzer
 
     /// <summary>
     /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// </summary>
+    /// <remarks>
     /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
     /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
     /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
@@ -499,7 +526,7 @@ public static class HandAnalyzer
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
     /// <para>You can also access <paramref name="handAnalyzer"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
-    /// </summary>
+    /// </remarks>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <param name="handAnalyzer">The hand analyzer.</param>
@@ -532,6 +559,8 @@ public static class HandAnalyzer
 
     /// <summary>
     /// <para>Calculates the Expected Value (EV) of a subset of hands. The EV is sum of each hand's probability multiplied by some value produced by that hand.</para>
+    /// </summary>
+    /// <remarks>
     /// <para>For example, each hand has a certain number of Trap Cards (zero is valid). To find the EV, we count the number of Trap Cards in a hand (T_x),
     /// then multiple that by the probability of drawing that hand (P_x). We do that for every hand (x), and the summation of all those (T_x * P_x) is the EV.</para>
     /// <para>This method calculates the EV of a subset of hands. We apply a filter called F, which determines which hands to include in the subset and which not.
@@ -539,7 +568,7 @@ public static class HandAnalyzer
     /// <para>For example, we play a trap deck with "Wannabee!" in it and we want to know how many traps we will have if we draw "Wannabee!" EV(A) would be the EV
     /// of all possible hands, while EV(B) would be the EV of only hands where we do draw "Wannabee!"</para>
     /// <para>You can also access <paramref name="handAnalyzer"/> and <paramref name="args"/> in <paramref name="filter"/> and <paramref name="valueSelector"/>.</para>
-    /// </summary>
+    /// </remarks>
     /// <typeparam name="TCardGroup">The card group type, which has all the data for that card (name, amount, stats, etc.)</typeparam>
     /// <typeparam name="TCardGroupName">The card name type.</typeparam>
     /// <typeparam name="TArgs">The type of <paramref name="args"/>.</typeparam>
