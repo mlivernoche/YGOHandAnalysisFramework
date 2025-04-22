@@ -68,6 +68,21 @@ public static class Transform
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>;
 
+    public static CardList<CardGroup<TCardGroupName>, TCardGroupName> Optimize<TCardGroupName>(this CardList<CardGroup<TCardGroupName>, TCardGroupName> cardList, IEnumerable<TCardGroupName> cardsToSave, TCardGroupName miscCardGroupName)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return cardList.Optimize(cardsToSave, (size, min, max) =>
+        {
+            return new CardGroup<TCardGroupName>()
+            {
+                Name = miscCardGroupName,
+                Size = size,
+                Minimum = min,
+                Maximum = max,
+            };
+        });
+    }
+
     public static HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName> Optimize<TCardGroupName>(this HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName> analyzer, IEnumerable<TCardGroupName> cardsToSave, TCardGroupName miscCardGroupName)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -92,31 +107,41 @@ public static class Transform
         }
     }
 
-    public static HandAnalyzer<TCardGroup, TCardGroupName> Optimize<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, IEnumerable<TCardGroupName> cardsToSave, CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory)
+    public static CardList<TCardGroup, TCardGroupName> Optimize<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cardList, IEnumerable<TCardGroupName> cardsToSave, CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var cardGroups = new HashSet<TCardGroup>();
         var cardsToSaveCopy = cardsToSave is IReadOnlySet<TCardGroupName> names ? names : new HashSet<TCardGroupName>(cardsToSave);
 
-        foreach (var (cardGroupName, cardGroup) in analyzer.CardGroups)
+        foreach (var cardGroup in cardList)
         {
-            if (cardsToSaveCopy.Contains(cardGroupName))
+            if (cardsToSaveCopy.Contains(cardGroup.Name))
             {
                 cardGroups.Add(cardGroup);
             }
         }
 
+        var deckSize = cardList.GetNumberOfCards();
         var cardSize = cardGroups.Sum(static group => group.Size);
-        Guard.IsLessThanOrEqualTo(cardSize, analyzer.DeckSize);
+        Guard.IsLessThanOrEqualTo(cardSize, deckSize);
         Guard.IsGreaterThan(cardSize, 0);
-        var miscSize = analyzer.DeckSize - cardSize;
+        var miscSize = deckSize - cardSize;
         var misc = miscFactory(miscSize, 0, miscSize);
         cardGroups.Add(misc);
 
-        var cardList = CardList.Create<TCardGroup, TCardGroupName>(cardGroups);
-        var analyzerArgs = HandAnalyzerBuildArguments.Create(analyzer.AnalyzerName, analyzer.HandSize, cardList);
-        return HandAnalyzer.Create(analyzerArgs);
+        return CardList.Create<TCardGroup, TCardGroupName>(cardGroups);
+    }
+
+    public static HandAnalyzer<TCardGroup, TCardGroupName> Optimize<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, IEnumerable<TCardGroupName> cardsToSave, CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return CardList
+            .Create(analyzer)
+            .Optimize(cardsToSave, miscFactory)
+            .CreateHandAnalyzerBuildArgs(analyzer.AnalyzerName, analyzer.HandSize)
+            .CreateHandAnalyzer();
     }
 
     public static IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> Optimize<TCardGroup, TCardGroupName>(this IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> analyzers, IEnumerable<TCardGroupName> cardsToSave, CreateMiscCardGroup<TCardGroup, TCardGroupName> miscFactory)
