@@ -630,6 +630,15 @@ public static class HandAnalyzer
 
         return calculator(aggregateValues);
     }
+
+    public static CardList<CardGroup<TCardGroupName>, TCardGroupName> ConvertToCardGroup<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return CardList
+            .Create(handAnalyzer)
+            .Cast(CardGroup.CreateFrom<TCardGroup, TCardGroupName>);
+    }
 }
 
 public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFormatterEntry, ICalculator<HandAnalyzer<TCardGroup, TCardGroupName>>
