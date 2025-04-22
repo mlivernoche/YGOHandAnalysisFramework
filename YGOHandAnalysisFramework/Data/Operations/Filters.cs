@@ -203,6 +203,24 @@ public static class Filters
         return total;
     }
 
+    /// <summary>
+    /// Counts the total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.
+    /// </summary>
+    /// <remarks>This method uses <c>params ReadOnlySpan&lt;&gt;</c>, <see href="https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/#params-collections">which can be better optimized by .NET</see>.</remarks>
+    /// <returns>The total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.</returns>
+    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, params ReadOnlySpan<TCardGroupName> cardNames)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        var total = 0;
+
+        foreach (var card in cardNames)
+        {
+            total += hand.CountCopiesOfCardInHand(card);
+        }
+
+        return total;
+    }
+
     public static IEnumerable<TCard> FilterByName<TCard, TCardGroupName, TValue>(this IReadOnlyDictionary<TCardGroupName, TValue> cards, IEnumerable<TCard> names)
         where TCard : INamedCard<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
