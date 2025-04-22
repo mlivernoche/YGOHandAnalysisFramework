@@ -5,12 +5,19 @@ using YGOHandAnalysisFramework.Data.Extensions.Linq;
 using YGOHandAnalysisFramework.Features.Analysis;
 using YGOHandAnalysisFramework.Features.Caching;
 using YGOHandAnalysisFramework.Features.Comparison.Calculator;
+using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.WeightedProbability;
 
 namespace YGOHandAnalysisFramework.Features.Configuration;
 
 public static class Configuration
 {
+    public static IConfiguration<TCardGroupName> CreateDefaultConfiguration<TCardGroupName>(IHandAnalyzerOutputStream outputStream, CreateDataComparisonFormatter comparisonFormatter)
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new DefaultConfiguration<TCardGroupName>(outputStream, comparisonFormatter);
+    }
+
     public static IReadOnlySet<TCardGroupName> GetAllCardNames<TCardGroupName>(this IConfiguration<TCardGroupName> config)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
