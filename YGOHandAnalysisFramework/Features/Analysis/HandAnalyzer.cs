@@ -14,7 +14,7 @@ namespace YGOHandAnalysisFramework.Features.Analysis;
 public static class HandAnalyzer
 {
     [Pure]
-    public static HandAnalyzer<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments)
+    public static HandAnalyzer<TCardGroup, TCardGroupName> CreateHandAnalyzer<TCardGroup, TCardGroupName>(this HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -22,7 +22,7 @@ public static class HandAnalyzer
     }
 
     [Pure]
-    public static HandAnalyzer<TCardGroup, TCardGroupName> Create<TCardGroup, TCardGroupName>(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
+    public static HandAnalyzer<TCardGroup, TCardGroupName> CreateHandAnalyzer<TCardGroup, TCardGroupName>(this HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> buildArguments, HandAnalyzerLoader<TCardGroup, TCardGroupName> loader)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -31,7 +31,7 @@ public static class HandAnalyzer
             return loadedAnalyzer;
         }
 
-        var handAnalyzer = Create(buildArguments);
+        var handAnalyzer = CreateHandAnalyzer(buildArguments);
         loader.CreateCache(handAnalyzer);
 
         return handAnalyzer;
@@ -113,7 +113,7 @@ public static class HandAnalyzer
         Guard.IsGreaterThan(handSize, 0);
 
         var args = HandAnalyzerBuildArguments.Create(originalAnalyzer.AnalyzerName, handSize, cardList);
-        return Create(args);
+        return CreateHandAnalyzer(args);
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public static class HandAnalyzer
 
         Guard.IsGreaterThan(actualHandSize, 0);
         var args = HandAnalyzerBuildArguments.Create(originalAnalyzer.AnalyzerName, actualHandSize, cardList);
-        return Create(args);
+        return CreateHandAnalyzer(args);
     }
 
     /// <summary>
