@@ -17,6 +17,20 @@ public static class HandAnalyzerBuildArguments
     {
         return new HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>(analyzerName, handSize, cardList);
     }
+
+    public static HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> CreateHandAnalyzerBuildArgs<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cardList, string analyzerName, int handSize)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>(analyzerName, handSize, cardList);
+    }
+
+    public static HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> CreateHandAnalyzerBuildArgs<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
+        where TCardGroup : ICardGroup<TCardGroupName>
+        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
+    {
+        return new HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>(handAnalyzer.AnalyzerName, handAnalyzer.HandSize, CardList.Create(handAnalyzer));
+    }
 }
 
 public record HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>(string AnalyzerName, int HandSize, IReadOnlyCollection<TCardGroup> CardGroups)
