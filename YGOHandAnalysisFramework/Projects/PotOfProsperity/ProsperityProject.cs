@@ -71,11 +71,17 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
         }
 
         var totalProb = 0.0;
-
-        var prosperityTargets = handAnalyzer.CardGroups.Values.Where(static group => group.IsProsperityTarget).Select(static group => group.Name).ToImmutableHashSet();
-        var optimizedAnalyzerCardList = handAnalyzer.CreateSimplifiedCardList(prosperityName, miscName, prosperityTargets);
-        var optimizedAnalyzerArgs = HandAnalyzerBuildArguments.Create("Test Analyzer Simplified", handAnalyzer.HandSize, optimizedAnalyzerCardList);
-        var optimizedAnalyzer = HandAnalyzer.Create(optimizedAnalyzerArgs);
+        var prosperityTargets = handAnalyzer
+            .CardGroups
+            .Values
+            .Where(static group => group.IsProsperityTarget)
+            .Select(static group => group.Name)
+            .ToImmutableHashSet();
+        var optimizedAnalyzer = HandAnalyzer
+            .ConvertToCardGroup(handAnalyzer)
+            .Optimize(prosperityTargets.Add(prosperityName), miscName)
+            .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
+            .CreateHandAnalyzer();
 
         foreach (var hand in optimizedAnalyzer.Combinations)
         {
@@ -84,7 +90,10 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
                 continue;
             }
 
-            var targets = hand.GetCardsInHand(optimizedAnalyzer).Select(static group => group.Name).ToImmutableHashSet();
+            var targets = hand
+                .GetCardsInHand()
+                .Select(static card => card.HandName)
+                .ToImmutableHashSet();
             targets = prosperityTargets.Except(targets);
 
             if(targets.Count == 0)
@@ -134,10 +143,17 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
 
         var expectedValue = 0.0;
 
-        var prosperityTargets = handAnalyzer.CardGroups.Values.Where(static group => group.IsProsperityTarget).Select(static group => group.Name).ToImmutableHashSet();
-        var optimizedAnalyzerCardList = handAnalyzer.CreateSimplifiedCardList(prosperityName, miscName, prosperityTargets);
-        var optimizedAnalyzerArgs = HandAnalyzerBuildArguments.Create("Test Analyzer Simplified", handAnalyzer.HandSize, optimizedAnalyzerCardList);
-        var optimizedAnalyzer = HandAnalyzer.Create(optimizedAnalyzerArgs);
+        var prosperityTargets = handAnalyzer
+            .CardGroups
+            .Values
+            .Where(static group => group.IsProsperityTarget)
+            .Select(static group => group.Name)
+            .ToImmutableHashSet();
+        var optimizedAnalyzer = HandAnalyzer
+            .ConvertToCardGroup(handAnalyzer)
+            .Optimize(prosperityTargets.Add(prosperityName), miscName)
+            .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
+            .CreateHandAnalyzer();
 
         foreach (var hand in optimizedAnalyzer.Combinations)
         {
@@ -146,7 +162,10 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
                 continue;
             }
 
-            var targets = hand.GetCardsInHand(optimizedAnalyzer).Select(static group => group.Name).ToImmutableHashSet();
+            var targets = hand
+                .GetCardsInHand(optimizedAnalyzer)
+                .Select(static group => group.Name)
+                .ToImmutableHashSet();
             targets = prosperityTargets.Except(targets);
 
             if (targets.Count == 0)
@@ -190,10 +209,17 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
 
         var totalProb = 0.0;
 
-        var prosperityTargets = handAnalyzer.CardGroups.Values.Where(static group => group.IsProsperityTarget).Select(static group => group.Name).ToImmutableHashSet();
-        var optimizedAnalyzerCardList = handAnalyzer.CreateSimplifiedCardList(prosperityName, miscName, prosperityTargets);
-        var optimizedAnalyzerArgs = HandAnalyzerBuildArguments.Create("Test Analyzer Simplified", handAnalyzer.HandSize, optimizedAnalyzerCardList);
-        var optimizedAnalyzer = HandAnalyzer.Create(optimizedAnalyzerArgs);
+        var prosperityTargets = handAnalyzer
+            .CardGroups
+            .Values
+            .Where(static group => group.IsProsperityTarget)
+            .Select(static group => group.Name)
+            .ToImmutableHashSet();
+        var optimizedAnalyzer = HandAnalyzer
+            .ConvertToCardGroup(handAnalyzer)
+            .Optimize(prosperityTargets.Add(prosperityName), miscName)
+            .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
+            .CreateHandAnalyzer();
 
         foreach (var hand in optimizedAnalyzer.Combinations)
         {
@@ -202,7 +228,10 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
                 continue;
             }
 
-            var targets = hand.GetCardsInHand(optimizedAnalyzer).Select(static group => group.Name).ToImmutableHashSet();
+            var targets = hand
+                .GetCardsInHand(optimizedAnalyzer)
+                .Select(static group => group.Name)
+                .ToImmutableHashSet();
             targets = prosperityTargets.Except(targets);
 
             if (targets.Count == 0)
