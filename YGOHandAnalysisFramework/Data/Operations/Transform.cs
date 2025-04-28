@@ -171,32 +171,4 @@ public static class Transform
 
         return optimizedAnalyzers;
     }
-
-    public static HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName> ConvertToCardGroup<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var cardList = CardList
-            .Create(handAnalyzer)
-            .Cast(static group => new CardGroup<TCardGroupName>()
-            {
-                Name = group.Name,
-                Size = group.Size,
-                Minimum = group.Minimum,
-                Maximum = group.Maximum,
-            });
-        var buildArgs = HandAnalyzerBuildArguments.Create(handAnalyzer.AnalyzerName, handAnalyzer.HandSize, cardList);
-        return new HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>(buildArgs, handAnalyzer.Combinations);
-    }
-
-
-    public static IEnumerable<HandAnalyzer<CardGroup<TCardGroupName>, TCardGroupName>> ConvertToCardGroup<TCardGroup, TCardGroupName>(this IEnumerable<HandAnalyzer<TCardGroup, TCardGroupName>> handAnalyzers)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var handAnalyzer in handAnalyzers)
-        {
-            yield return handAnalyzer.ConvertToCardGroup();
-        }
-    }
 }
