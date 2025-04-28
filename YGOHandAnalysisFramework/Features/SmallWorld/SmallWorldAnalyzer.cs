@@ -6,13 +6,13 @@ namespace YGOHandAnalysisFramework.Features.SmallWorld;
 
 public static class SmallWorldAnalyzer
 {
-    public static SmallWorldAnalyzer<TCardGroupName> Create<TCardGroupName>(this IEnumerable<ISmallWorldCard<TCardGroupName>> cards)
+    public static SmallWorldAnalyzer<TCardGroupName> CreateSmallWorldAnalyzer<TCardGroupName>(this IEnumerable<ISmallWorldCard<TCardGroupName>> cards)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         return new SmallWorldAnalyzer<TCardGroupName>(cards);
     }
 
-    public static SmallWorldAnalyzer<TCardGroupName> Create<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards)
+    public static SmallWorldAnalyzer<TCardGroupName> CreateSmallWorldAnalyzer<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards)
         where TCardGroup : ICardGroup<TCardGroupName>, ISmallWorldCard<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {

@@ -104,7 +104,7 @@ public static class CardList
     }
 
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> Remove<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards, TCardGroupName card)
+    public static CardList<TCardGroup, TCardGroupName> RemoveCardName<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards, TCardGroupName card)
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
@@ -112,11 +112,11 @@ public static class CardList
     }
 
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> RemoveHand<TCardGroup, TCardGroupName>(this IEnumerable<TCardGroup> cards, HandCombination<TCardGroupName> hand)
+    public static CardList<TCardGroup, TCardGroupName> RemoveHand<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cardList, HandCombination<TCardGroupName> hand)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var dict = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cards);
+        var dict = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cardList);
 
         foreach (var cardInHand in hand.CardNames)
         {
@@ -144,7 +144,7 @@ public static class CardList
     }
 
     [Pure]
-    public static CardList<TCardGroup, TCardGroupName> RemoveCard<TCardGroup, TCardGroupName>(this IEnumerable<TCardGroup> cards, TCardGroupName cardInHand)
+    public static CardList<TCardGroup, TCardGroupName> RemoveCardCopy<TCardGroup, TCardGroupName>(this CardList<TCardGroup, TCardGroupName> cards, TCardGroupName cardInHand)
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
