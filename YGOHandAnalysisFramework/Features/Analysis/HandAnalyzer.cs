@@ -107,13 +107,16 @@ public static class HandAnalyzer
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var cardList = originalAnalyzer.CardGroups.Values.RemoveHand(hand);
+        var cardList = CardList
+            .Create(originalAnalyzer)
+            .RemoveHand(hand);
         var handSize = Math.Min(cardList.GetNumberOfCards(), originalAnalyzer.HandSize);
 
         Guard.IsGreaterThan(handSize, 0);
 
-        var args = HandAnalyzerBuildArguments.Create(originalAnalyzer.AnalyzerName, handSize, cardList);
-        return CreateHandAnalyzer(args);
+        return cardList
+            .CreateHandAnalyzerBuildArgs(originalAnalyzer.AnalyzerName, handSize)
+            .CreateHandAnalyzer();
     }
 
     /// <summary>
@@ -130,12 +133,16 @@ public static class HandAnalyzer
         where TCardGroup : ICardGroup<TCardGroup, TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var cardList = originalAnalyzer.CardGroups.Values.RemoveHand(hand);
+        var cardList = CardList
+            .Create(originalAnalyzer)
+            .RemoveHand(hand);
         var actualHandSize = Math.Min(cardList.GetNumberOfCards(), handSize);
 
         Guard.IsGreaterThan(actualHandSize, 0);
-        var args = HandAnalyzerBuildArguments.Create(originalAnalyzer.AnalyzerName, actualHandSize, cardList);
-        return CreateHandAnalyzer(args);
+
+        return cardList
+            .CreateHandAnalyzerBuildArgs(originalAnalyzer.AnalyzerName, actualHandSize)
+            .CreateHandAnalyzer();
     }
 
     /// <summary>

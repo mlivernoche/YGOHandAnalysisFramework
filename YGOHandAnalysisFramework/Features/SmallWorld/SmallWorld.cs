@@ -17,8 +17,10 @@ public static class SmallWorld
             return false;
         }
 
-        var cardsInDeck = handAnalyzer.CardGroups.Values.RemoveHand(hand);
-        var smallWorldAnalyzer = SmallWorldAnalyzer.Create(cardsInDeck);
+        var smallWorldAnalyzer = CardList
+            .Create(handAnalyzer)
+            .RemoveHand(hand)
+            .CreateSmallWorldAnalyzer();
 
         foreach (var card in hand.GetCardsInHand())
         {
@@ -40,8 +42,10 @@ public static class SmallWorld
             return false;
         }
 
-        var cardsInDeck = handAnalyzer.CardGroups.Values.RemoveHand(hand);
-        var smallWorldAnalyzer = SmallWorldAnalyzer.Create(cardsInDeck);
+        var cardsInDeck = CardList
+            .Create(handAnalyzer)
+            .RemoveHand(hand);
+        var smallWorldAnalyzer = cardsInDeck.CreateSmallWorldAnalyzer();
 
         foreach (var card in hand.GetCardsInHand())
         {
@@ -57,8 +61,8 @@ public static class SmallWorld
 
             foreach (var name in searchGraph.GetCardsAccessibleFromName(card.HandName))
             {
-                var deckWithoutCard = cardsInDeck.RemoveCard(name);
-                var newSmallWorldAnalyzer = SmallWorldAnalyzer.Create(deckWithoutCard);
+                var deckWithoutCard = cardsInDeck.RemoveCardName(name);
+                var newSmallWorldAnalyzer = deckWithoutCard.CreateSmallWorldAnalyzer();
 
                 if (newSmallWorldAnalyzer.HasBridge(name, search))
                 {
