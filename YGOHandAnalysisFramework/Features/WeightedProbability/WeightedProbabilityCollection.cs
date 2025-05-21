@@ -6,12 +6,14 @@ namespace YGOHandAnalysisFramework.Features.WeightedProbability;
 public static class WeightedProbabilityCollection
 {
     public static WeightedProbabilityCollection<TWeighted> CreateWithEqualWeights<TWeighted>(string name, IEnumerable<TWeighted> weighteds)
+        where TWeighted : notnull
     {
         return new WeightedProbabilityCollection<TWeighted>(name, weighteds.Select(static weighted => new WeightedData<TWeighted>(1.0, weighted)));
     }
 }
 
 public record WeightedProbabilityCollection<TWeighted> : IDataComparisonFormatterEntry, ICalculator<TWeighted>
+    where TWeighted : notnull
 {
     private string Name { get; }
     private HashSet<WeightedData<TWeighted>> WeightedData { get; }
@@ -46,6 +48,18 @@ public record WeightedProbabilityCollection<TWeighted> : IDataComparisonFormatte
         }
 
         return probability;
+    }
+
+    public IReadOnlyDictionary<TWeighted, TReturn> Map<TReturn>(Func<TWeighted, TReturn> selector)
+    {
+        var dict = new Dictionary<TWeighted, TReturn>();
+
+        foreach(var weighted in WeightedData)
+        {
+            dict[weighted.WeightedValue] = selector(weighted.WeightedValue);
+        }
+
+        return dict;
     }
 
     public string GetHeader()

@@ -723,4 +723,12 @@ public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFo
     {
         return selector(this, args);
     }
+
+    IReadOnlyDictionary<HandAnalyzer<TCardGroup, TCardGroupName>, TReturn> ICalculator<HandAnalyzer<TCardGroup, TCardGroupName>>.Map<TReturn>(Func<HandAnalyzer<TCardGroup, TCardGroupName>, TReturn> selector)
+    {
+        return new Dictionary<HandAnalyzer<TCardGroup, TCardGroupName>, TReturn>
+        {
+            [this] = selector(this)
+        };
+    }
 }
