@@ -32,6 +32,30 @@ public static class DataComparison
     }
 
     [Pure]
+    public static DataComparison<TComparison> Generate<TComparison, TArgs>(this DataComparison<TComparison> comparison, IEnumerable<TArgs> sourceArgs, Func<DataComparison<TComparison>, TArgs, DataComparison<TComparison>> generator)
+        where TComparison : IDataComparisonFormatterEntry
+    {
+        foreach(var args in sourceArgs)
+        {
+            comparison = generator(comparison, args);
+        }
+
+        return comparison;
+    }
+
+    [Pure]
+    public static DataComparison<ICalculatorWrapper<TComparison>> Generate<TComparison, TArgs>(this DataComparison<ICalculatorWrapper<TComparison>> comparison, IEnumerable<TArgs> sourceArgs, Func<DataComparison<ICalculatorWrapper<TComparison>>, TArgs, DataComparison<ICalculatorWrapper<TComparison>>> generator)
+        where TComparison : ICalculator<TComparison>, IDataComparisonFormatterEntry
+    {
+        foreach (var args in sourceArgs)
+        {
+            comparison = generator(comparison, args);
+        }
+
+        return comparison;
+    }
+
+    [Pure]
     public static DataComparison<TComparison> AddCategories<TComparison>(this DataComparison<TComparison> comparison, IEnumerable<IDataComparisonCategory<TComparison>> categories)
         where TComparison : IDataComparisonFormatterEntry
     {
@@ -232,6 +256,19 @@ public class DataComparison<TComparison>
     }
 
     public IDataComparisonFormatter Run(CreateDataComparisonFormatter factory)
+    {
+        var results = new List<IDataComparisonCategoryResults>();
+
+        foreach (var category in Categories)
+        {
+            results.Add(category.GetResults(ComparisonFocuses));
+        }
+
+        return factory(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
+    }
+
+    public IDataComparisonFormatter<T> Run<T>(CreateDataComparisonFormatter<T> factory)
+        where T : notnull
     {
         var results = new List<IDataComparisonCategoryResults>();
 
