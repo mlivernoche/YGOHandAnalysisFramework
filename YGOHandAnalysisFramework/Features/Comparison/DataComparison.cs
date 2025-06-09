@@ -306,4 +306,32 @@ public class DataComparison<TComparison>
             .ToList();
         return factory(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
     }
+
+    public IDataComparisonFormatter<T> RunInParallel<T>(CreateDataComparisonFormatter<T> factory)
+        where T : notnull
+    {
+        var list = new List<(int, IDataComparisonCategory<TComparison>)>();
+
+        {
+            int sortId = 0;
+            foreach (var category in Categories)
+            {
+                list.Add((sortId++, category));
+            }
+        }
+
+        var output = new ConcurrentBag<(int SortId, IDataComparisonCategoryResults Result)>();
+
+        Parallel.ForEach(list, tuple =>
+        {
+            var (sortId, category) = tuple;
+            output.Add((sortId, category.GetResults(ComparisonFocuses)));
+        });
+
+        var results = output
+            .OrderBy(static x => x.SortId)
+            .Select(static x => x.Result)
+            .ToList();
+        return factory(ComparisonFocuses.Cast<IDataComparisonFormatterEntry>(), results);
+    }
 }
