@@ -25,16 +25,16 @@ public readonly struct Result<T, E> : IEquatable<Result<T, E>>
 
     public readonly bool GetResult([NotNullWhen(true)] out T? result, [NotNullWhen(false)] out E? error)
     {
-        result = default;
-        error = default;
         if (Success)
         {
             Guard.IsNotNull(Value);
             result = Value;
+            error = default;
         }
         else
         {
             Guard.IsNotNull(Error);
+            result = default;
             error = Error;
         }
 
