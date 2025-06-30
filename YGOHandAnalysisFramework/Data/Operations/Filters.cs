@@ -142,9 +142,15 @@ public static class Filters
     public static bool HasAllOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var filtered = hand.GetCardsInHand().Select(static card => card.HandName);
-        var set = new HashSet<TCardGroupName>(filtered);
-        return set.IsProperSupersetOf(cardNames);
+        foreach (var included in cardNames)
+        {
+            if (!hand.HasThisCard(included))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
