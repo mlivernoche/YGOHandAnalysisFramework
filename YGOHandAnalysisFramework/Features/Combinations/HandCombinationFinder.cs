@@ -40,13 +40,13 @@ internal static class HandCombinationFinder
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         var hand = cardGroups
-                .Select(static group => new HandElement<TCardGroupName>
-                {
-                    HandName = group.Name,
-                    MinimumSize = group.Minimum,
-                    MaximumSize = group.Maximum,
-                })
-                .ToHashSet();
+            .Select(static group => new HandElement<TCardGroupName>
+            {
+                HandName = group.Name,
+                MinimumSize = group.Minimum,
+                MaximumSize = group.Maximum,
+            })
+            .ToHashSet();
 
         return GetCombinations(startingHandSize, hand);
     }
@@ -94,15 +94,15 @@ internal static class HandCombinationFinder
             start.Push(group);
         }
 
-        var permutations = new List<HandElement<TCardGroupName>[]>(32768);
+        var permutations = new List<HandElement<TCardGroupName>[]>(cardGroups.Count);
         var stack = new HandStackWithSizeCounter<TCardGroupName>();
         var start = new Stack<HandElement<TCardGroupName>>(cardGroups);
         Recursive(startingHandSize, stack, permutations, start);
 
         var emptyHand = new HashSet<HandElement<TCardGroupName>>(cardGroups.Count);
 
-        foreach(var card in cardGroups)
-            {
+        foreach (var card in cardGroups)
+        {
             emptyHand.Add(new HandElement<TCardGroupName>()
             {
                 HandName = card.HandName,
@@ -120,8 +120,8 @@ internal static class HandCombinationFinder
             // v.s. hand 2 = [a:0, b:1, c:2, d:1, ...]
             // sorting is handled by HandCombination<TCardGroupName>
             var handWithEmpties = new HashSet<HandElement<TCardGroupName>>(handPermutation, HandCombinationNameComparer<TCardGroupName>.Default);
-            
-            foreach(var empty in emptyHand)
+
+            foreach (var empty in emptyHand)
             {
                 handWithEmpties.Add(empty);
             }
