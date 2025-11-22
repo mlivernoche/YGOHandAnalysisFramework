@@ -6,50 +6,39 @@ namespace YGOHandAnalysisFramework.Features.Combinations;
 public readonly struct HandCombination<TCardGroupName> : IEquatable<HandCombination<TCardGroupName>>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
-    private sealed class Comparer : IComparer<HandElement<TCardGroupName>>
-    {
-        public static readonly Comparer Instance = new Comparer();
+    internal readonly ReadOnlyMemory<byte> Hand { get; }
+    internal readonly IReadOnlyList<TCardGroupName> CardNames { get; }
 
-        public int Compare(HandElement<TCardGroupName> x, HandElement<TCardGroupName> y)
+    public HandCombination(ReadOnlyMemory<byte> hand, IReadOnlyList<TCardGroupName> cards)
+    {
+        Hand = hand;
+        CardNames = cards;
+    }
+
+    public readonly IEnumerable<TCardGroupName> GetCardsInHand()
+    {
+        foreach(var (amount, card) in this)
         {
-            return x.HandName.CompareTo(y.HandName);
+            if(amount > 0)
+            {
+                yield return card;
+            }
         }
     }
 
-    internal ImmutableSortedSet<HandElement<TCardGroupName>> CardNames { get; }
-
-    public HandCombination()
+    public readonly bool Equals(HandCombination<TCardGroupName> other)
     {
-        CardNames = ImmutableSortedSet<HandElement<TCardGroupName>>.Empty.WithComparer(Comparer.Instance);
+        return Hand.Equals(other.Hand) && CardNames == other.CardNames;
     }
 
-    public HandCombination(IEnumerable<HandElement<TCardGroupName>> permutations)
-    {
-        CardNames = permutations.ToImmutableSortedSet(Comparer.Instance);
-    }
-
-    internal IEnumerable<HandElement<TCardGroupName>> GetAllHandElements() => CardNames;
-
-    public bool Equals(HandCombination<TCardGroupName> other)
-    {
-        return other.CardNames == CardNames || CardNames.SetEquals(other.CardNames);
-    }
-
-    public override bool Equals(object? obj)
+    public override readonly bool Equals(object? obj)
     {
         return obj is HandCombination<TCardGroupName> other && Equals(other);
     }
 
-    public override int GetHashCode()
+    public override readonly int GetHashCode()
     {
-        var hashCode = 0;
-
-        foreach (var permutation in CardNames)
-        {
-            hashCode = HashCode.Combine(hashCode, permutation);
-        }
-
-        return hashCode;
+        return HashCode.Combine(Hand, CardNames);
     }
 
     public static bool operator ==(HandCombination<TCardGroupName> left, HandCombination<TCardGroupName> right)
@@ -60,5 +49,32 @@ public readonly struct HandCombination<TCardGroupName> : IEquatable<HandCombinat
     public static bool operator !=(HandCombination<TCardGroupName> left, HandCombination<TCardGroupName> right)
     {
         return !(left == right);
+    }
+
+    public readonly Enumerator GetEnumerator()
+    {
+        return new Enumerator(this);
+    }
+
+    public struct Enumerator
+    {
+        private int _index;
+        private readonly ReadOnlyMemory<byte> _hand;
+        private readonly IReadOnlyList<TCardGroupName> _deck;
+
+        public readonly (int Amount, TCardGroupName CardName) Current => (_hand.Span[_index], _deck[_index]);
+
+        public Enumerator(HandCombination<TCardGroupName> handCombination)
+        {
+            _hand = handCombination.Hand;
+            _deck = handCombination.CardNames;
+            _index = -1;
+        }
+
+        public bool MoveNext()
+        {
+            _index++;
+            return _index < _hand.Length;
+        }
     }
 }

@@ -64,7 +64,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject<TCar
 
     private static Func<HandAnalyzer<TCardGroup, TCardGroupName>, double> HasThisNumberOfNonEngine(int numberToCount)
     {
-        return analyzer => analyzer.CalculateProbability((analyzer, hand) =>
+        return analyzer => analyzer.CalculateProbability(hand =>
         {
             var total = 0;
 
@@ -82,7 +82,7 @@ public class NonEngineCounterProject<TCardGroup, TCardGroupName> : IProject<TCar
 
     private static Func<HandAnalyzer<TCardGroup, TCardGroupName>, double> HasAtLeastThisNumberOfNonEngine(int numberToCount)
     {
-        return analyzer => analyzer.CalculateProbability((analyzer, hand) =>
+        return analyzer => analyzer.CalculateProbability(hand =>
         {
             var total = 0;
 

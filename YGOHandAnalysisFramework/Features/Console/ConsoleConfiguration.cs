@@ -74,7 +74,7 @@ public static class ConsoleConfiguration
                 }
 
                 System.Console.WriteLine("Building analyzers.");
-                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet(), componentsLoader.CreateCacheLoader(config));
+                var analyzersCollection = config.CreateAnalyzers(componentsLoader.CreateMiscCardGroup, componentsLoader.CreateCardGroup, componentsLoader.GetSupportedCards(config).ToHashSet());
                 System.Console.WriteLine("Completed building analyzers.");
                 System.Console.WriteLine();
 

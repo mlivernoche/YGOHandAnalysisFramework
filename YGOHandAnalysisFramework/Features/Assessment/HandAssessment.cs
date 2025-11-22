@@ -175,11 +175,19 @@ public static class HandAssessment
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
         where TAssessment : IHandAssessment<TCardGroupName>
     {
-        var assessments = analyzer.Combinations.Select(filter).ToList();
-        var includedHands = assessments
-            .Where(static assessment => assessment.Included)
-            .Select(static assessment => assessment.Hand);
-        var prob = Calculator.CalculateProbability(analyzer.CardGroups.Values, includedHands, analyzer.DeckSize, analyzer.HandSize);
+        var assessments = new List<TAssessment>();
+        var prob = 0.0;
+
+        foreach(var hand in analyzer.Combinations)
+        {
+            var assessment = filter(hand);
+            assessments.Add(assessment);
+
+            if (assessment.Included)
+            {
+                prob += analyzer.CalculateProbability(hand);
+            }
+        }
 
         return new HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>(analyzer, prob, assessments);
     }
@@ -190,16 +198,18 @@ public static class HandAssessment
         where TAssessment : IHandAssessment<TCardGroupName>
     {
         var assessments = new List<TAssessment>();
+        var prob = 0.0;
 
         foreach (var hand in analyzer.Combinations)
         {
-            assessments.Add(filter(analyzer, hand));
-        }
+            var assessment = filter(analyzer, hand);
+            assessments.Add(assessment);
 
-        var includedHands = assessments
-            .Where(static assessment => assessment.Included)
-            .Select(static assessment => assessment.Hand);
-        var prob = Calculator.CalculateProbability(analyzer.CardGroups.Values, includedHands, analyzer.DeckSize, analyzer.HandSize);
+            if (assessment.Included)
+            {
+                prob += analyzer.CalculateProbability(hand);
+            }
+        }
 
         return new HandAssessmentAnalyzer<TCardGroup, TCardGroupName, TAssessment>(analyzer, prob, assessments);
     }

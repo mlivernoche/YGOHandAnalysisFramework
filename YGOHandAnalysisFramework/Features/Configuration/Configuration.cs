@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using YGOHandAnalysisFramework.Data;
 using YGOHandAnalysisFramework.Data.Extensions.Linq;
 using YGOHandAnalysisFramework.Features.Analysis;
-using YGOHandAnalysisFramework.Features.Caching;
 using YGOHandAnalysisFramework.Features.Comparison.Calculator;
 using YGOHandAnalysisFramework.Features.Comparison.Formatting;
 using YGOHandAnalysisFramework.Features.WeightedProbability;
@@ -97,17 +96,6 @@ public static class Configuration
         return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty, static buildArgs => HandAnalyzer.CreateInParallel(buildArgs));
     }
 
-    public static IReadOnlyCollection<ICalculatorWrapper<HandAnalyzer<TCardGroup, TCardGroupName>>> CreateAnalyzers<TCardGroup, TCardGroupName>(
-        this IConfiguration<TCardGroupName> config,
-        Func<int, TCardGroup> miscGroupFactory,
-        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
-        HandAnalyzerLoader<TCardGroup, TCardGroupName> cacheLoader)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, ImmutableHashSet<TCardGroupName>.Empty, cacheLoader);
-    }
-
     public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(
         this IConfiguration<TCardGroupName> config,
         Func<int, TCardGroup> miscGroupFactory,
@@ -117,28 +105,6 @@ public static class Configuration
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
         return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, supportedCards, static buildArgs => HandAnalyzer.CreateInParallel(buildArgs));
-    }
-
-    public static ICalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(
-        this IConfiguration<TCardGroupName> config,
-        Func<int, TCardGroup> miscGroupFactory,
-        Func<CardGroup<TCardGroupName>, TCardGroup> cardGroupFactory,
-        IReadOnlySet<TCardGroupName> supportedCards,
-        HandAnalyzerLoader<TCardGroup, TCardGroupName> cacheLoader)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        IReadOnlyDictionary<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>, HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzer(IEnumerable<HandAnalyzerBuildArguments<TCardGroup, TCardGroupName>> buildArgs)
-        {
-            if(config.UseCache)
-            {
-                return HandAnalyzer.CreateInParallel(buildArgs, cacheLoader);
-            }
-
-            return HandAnalyzer.CreateInParallel(buildArgs);
-        }
-
-        return config.CreateAnalyzers(miscGroupFactory, cardGroupFactory, supportedCards, CreateAnalyzer);
     }
 
     private static CalculatorWrapperCollection<HandAnalyzer<TCardGroup, TCardGroupName>> CreateAnalyzers<TCardGroup, TCardGroupName>(

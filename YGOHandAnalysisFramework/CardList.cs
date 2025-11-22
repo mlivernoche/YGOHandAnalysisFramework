@@ -118,11 +118,11 @@ public static class CardList
     {
         var dict = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cardList);
 
-        foreach (var cardInHand in hand.CardNames)
+        foreach (var (amount, cardName) in hand)
         {
-            Guard.IsTrue(dict.TryGetValue(cardInHand.HandName, out var card));
+            Guard.IsTrue(dict.TryGetValue(cardName, out var card));
 
-            var newAmount = card.Size - cardInHand.MinimumSize;
+            var newAmount = card.Size - amount;
             if (newAmount == 0)
             {
                 dict.TryRemove(card);
@@ -259,14 +259,12 @@ public class CardList<TCardGroup, TCardGroupName> : ICardGroupCollection<TCardGr
 
             return
                 x.Name.Equals(y.Name) &&
-                x.Size == y.Size &&
-                x.Minimum == y.Minimum &&
-                x.Maximum == y.Maximum;
+                x.Size == y.Size;
         }
 
         int IEqualityComparer<ICardGroup<TCardGroupName>>.GetHashCode(ICardGroup<TCardGroupName> obj)
         {
-            return HashCode.Combine(obj.Name, obj.Size, obj.Minimum, obj.Maximum);
+            return HashCode.Combine(obj.Name, obj.Size);
         }
     }
 

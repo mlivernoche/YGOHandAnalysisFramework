@@ -14,8 +14,6 @@ public class CardGroupDTO
         {
             Name = nameConverter(cardGroup.Name),
             Size = cardGroup.Size,
-            Minimum = cardGroup.Minimum,
-            Maximum = cardGroup.Maximum,
         };
     }
 
@@ -26,8 +24,6 @@ public class CardGroupDTO
         {
             Name = nameConverter(cardGroup.Name),
             Size = cardGroup.Size,
-            Minimum = cardGroup.Minimum,
-            Maximum = cardGroup.Maximum,
         };
     }
 }
