@@ -77,8 +77,8 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
             .Where(static group => group.IsProsperityTarget)
             .Select(static group => group.Name)
             .ToImmutableHashSet();
-        var optimizedAnalyzer = HandAnalyzer
-            .ConvertToCardGroup(handAnalyzer)
+        var optimizedAnalyzer = handAnalyzer
+            .ConvertToCardGroup()
             .Optimize(prosperityTargets.Add(prosperityName), miscName)
             .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
             .CreateHandAnalyzer();
@@ -148,8 +148,8 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
             .Where(static group => group.IsProsperityTarget)
             .Select(static group => group.Name)
             .ToImmutableHashSet();
-        var optimizedAnalyzer = HandAnalyzer
-            .ConvertToCardGroup(handAnalyzer)
+        var optimizedAnalyzer = handAnalyzer
+            .ConvertToCardGroup()
             .Optimize(prosperityTargets.Add(prosperityName), miscName)
             .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
             .CreateHandAnalyzer();
@@ -214,8 +214,8 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
             .Where(static group => group.IsProsperityTarget)
             .Select(static group => group.Name)
             .ToImmutableHashSet();
-        var optimizedAnalyzer = HandAnalyzer
-            .ConvertToCardGroup(handAnalyzer)
+        var optimizedAnalyzer = handAnalyzer
+            .ConvertToCardGroup()
             .Optimize(prosperityTargets.Add(prosperityName), miscName)
             .CreateHandAnalyzerBuildArgs(handAnalyzer.AnalyzerName, handAnalyzer.HandSize)
             .CreateHandAnalyzer();
