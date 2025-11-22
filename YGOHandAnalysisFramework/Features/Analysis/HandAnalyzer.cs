@@ -652,10 +652,14 @@ public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFo
     where TCardGroup : ICardGroup<TCardGroupName>
     where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
 {
+    private readonly TCardGroup[] _cardGroups;
+
     public int DeckSize { get; }
     public int HandSize { get; }
+
     public IReadOnlyDictionary<TCardGroupName, TCardGroup> CardGroups { get; }
-    public IImmutableSet<HandCombination<TCardGroupName>> Combinations { get; }
+    public IReadOnlyList<TCardGroupName> CardNames { get; }
+    public IReadOnlySet<HandCombination<TCardGroupName>> Combinations { get; }
     public string AnalyzerName { get; }
 
     public HandAnalyzer(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> args)
@@ -663,45 +667,75 @@ public sealed class HandAnalyzer<TCardGroup, TCardGroupName> : IDataComparisonFo
         AnalyzerName = args.AnalyzerName;
         HandSize = args.HandSize;
 
-        CardGroups = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, args.CardGroups);
+        _cardGroups = [..args.CardGroups];
+        CardNames = [.. _cardGroups.Select(static card => card.Name)];
+        CardGroups = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, _cardGroups);
 
         DeckSize = CardGroups.Values.Sum(static group => group.Size);
         Guard.IsGreaterThanOrEqualTo(DeckSize, 1, nameof(DeckSize));
         Guard.IsLessThanOrEqualTo(DeckSize, 60, nameof(DeckSize));
 
-        Combinations = HandCombinationFinder.GetCombinations<TCardGroup, TCardGroupName>(args.HandSize, CardGroups.Values);
+        Span<byte> currentHandCounts = stackalloc byte[_cardGroups.Length];
+        var hands = new List<HandCombination<TCardGroupName>>();
+        Recurse(currentHandCounts, 0, HandSize, hands);
+        Combinations = hands.ToHashSet();
     }
 
-    public HandAnalyzer(HandAnalyzerBuildArguments<TCardGroup, TCardGroupName> args, IEnumerable<HandCombination<TCardGroupName>> handCombinations)
+    public double CalculateProbability(Func<HandCombination<TCardGroupName>, bool> filter)
     {
-        AnalyzerName = args.AnalyzerName;
-        HandSize = args.HandSize;
-
-        CardGroups = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, args.CardGroups);
-
-        DeckSize = CardGroups.Values.Sum(static group => group.Size);
-        Guard.IsGreaterThanOrEqualTo(DeckSize, 1, nameof(DeckSize));
-        Guard.IsLessThanOrEqualTo(DeckSize, 60, nameof(DeckSize));
-
-        Combinations = handCombinations.ToImmutableHashSet();
-    }
-
-    public int CountHands(Func<HandCombination<TCardGroupName>, bool> filter)
-    {
-        return Combinations.Count(filter);
-    }
-
-    public int[] CountUniqueCardName()
-    {
-        var counts = new int[HandSize + 1];
-
-        foreach (var combination in Combinations)
+        double prob = 0.0;
+        foreach (var hand in Combinations)
         {
-            var count = combination.CountCardNames();
-            counts[count]++;
+            if (filter(hand))
+            {
+                prob += CalculateProbability(hand);
+            }
+        }
+        return prob;
+    }
+
+    public double CalculateProbability(HandCombination<TCardGroupName> currentHand)
+    {
+        return CalculateProbability(currentHand.Hand.Span);
+    }
+
+    private void Recurse(Span<byte> currentHandCounts, int groupIndex, int cardsNeeded, List<HandCombination<TCardGroupName>> hands)
+    {
+        if (cardsNeeded == 0)
+        {
+            hands.Add(new HandCombination<TCardGroupName>(currentHandCounts.ToArray(), CardNames));
+            return;
         }
 
-        return counts;
+        if (groupIndex >= _cardGroups.Length) return;
+
+        var group = _cardGroups[groupIndex];
+
+        int maxTake = Math.Min(group.Size, cardsNeeded);
+
+        for (int count = maxTake; count >= 0; count--)
+        {
+            currentHandCounts[groupIndex] = (byte)count;
+            Recurse(currentHandCounts, groupIndex + 1, cardsNeeded - count, hands);
+        }
+
+        currentHandCounts[groupIndex] = 0;
+    }
+
+    private double CalculateProbability(ReadOnlySpan<byte> currentHand)
+    {
+        long numerator = 1;
+
+        for (int i = 0; i < currentHand.Length; i++)
+        {
+            int k = currentHand[i];
+            if (k == 0) continue;
+
+            int n = _cardGroups[i].Size;
+            numerator *= BinomialCache.Choose(n, k);
+        }
+
+        return numerator / (double)BinomialCache.Choose(DeckSize, HandSize);
     }
 
     public string GetHeader()

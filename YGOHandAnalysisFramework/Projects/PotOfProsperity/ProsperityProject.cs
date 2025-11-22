@@ -54,7 +54,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
 
         DataComparison
             .Create(calculators)
-            .AddCategory("Drawn Prosperity", probabilityFormatter, ProsperityName, static (analyzer, cardName) => analyzer.CalculateProbability(cardName, (hand, cardName) => hand.HasThisCard(cardName)))
+            .AddCategory("Drawn Prosperity", probabilityFormatter, ProsperityName, static (analyzer, cardName) => analyzer.CalculateProbability(hand => hand.HasThisCard(cardName)))
             .Run(configuration.FormatterFactory)
             .FormatResults()
             .Write(configuration.OutputStream);
@@ -92,7 +92,6 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
 
             var targets = hand
                 .GetCardsInHand()
-                .Select(static card => card.HandName)
                 .ToImmutableHashSet();
             targets = prosperityTargets.Except(targets);
 
@@ -124,7 +123,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
     private static double CalculateHitPercentage(HandAnalyzer<TCardGroup, TCardGroupName> handAnalyzer, TCardGroupName prosperityName, TCardGroupName miscName, int prosperityBanishNumber)
     {
         var probOfHitting = CalculateProbability(handAnalyzer, prosperityName, miscName, prosperityBanishNumber);
-        var probOfDrawingProsperity = handAnalyzer.CalculateProbability(prosperityName, static (hand, name) => hand.HasThisCard(name));
+        var probOfDrawingProsperity = handAnalyzer.CalculateProbability(hand => hand.HasThisCard(prosperityName));
 
         if(probOfDrawingProsperity > 0)
         {

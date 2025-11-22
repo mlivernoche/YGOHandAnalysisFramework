@@ -46,12 +46,12 @@ public sealed class CardCounterProject<TCardGroup, TCardGroupName> : IProject<TC
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.AddCategory($"Count={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability((analyzer, hand) => CountCards(analyzer, hand) == i));
+            comparison = comparison.AddCategory($"Count={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability(hand => CountCards(analyzer, hand) == i));
         }
 
         for (int i = 0; i <= maxNumberOfCardsToCount; i++)
         {
-            comparison = comparison.AddCategory($"Count>={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability((analyzer, hand) => CountCards(analyzer, hand) >= i));
+            comparison = comparison.AddCategory($"Count>={i:N0}", probabilityFormatter, analyzer => analyzer.CalculateProbability(hand => CountCards(analyzer, hand) >= i));
         }
 
         comparison

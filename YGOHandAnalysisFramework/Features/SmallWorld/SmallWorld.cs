@@ -22,9 +22,9 @@ public static class SmallWorld
             .RemoveHand(hand)
             .CreateSmallWorldAnalyzer();
 
-        foreach (var card in hand.GetCardsInHand())
+        foreach (var name in hand.GetCardsInHand())
         {
-            if (smallWorldAnalyzer.HasBridge(card.HandName, search))
+            if (smallWorldAnalyzer.HasBridge(name, search))
             {
                 return true;
             }
@@ -47,24 +47,24 @@ public static class SmallWorld
             .RemoveHand(hand);
         var smallWorldAnalyzer = cardsInDeck.CreateSmallWorldAnalyzer();
 
-        foreach (var card in hand.GetCardsInHand())
+        foreach (var name in hand.GetCardsInHand())
         {
-            if (smallWorldAnalyzer.HasBridge(card.HandName, search))
+            if (smallWorldAnalyzer.HasBridge(name, search))
             {
                 return true;
             }
 
-            if (!handAnalyzer.CardGroups.TryGetValue(card.HandName, out var group))
+            if (!handAnalyzer.CardGroups.TryGetValue(name, out var group))
             {
-                throw new Exception($"Card in hand \"{card.HandName}\" not in card list.");
+                throw new Exception($"Card in hand \"{name}\" not in card list.");
             }
 
-            foreach (var name in searchGraph.GetCardsAccessibleFromName(card.HandName))
+            foreach (var other in searchGraph.GetCardsAccessibleFromName(name))
             {
-                var deckWithoutCard = cardsInDeck.RemoveCardName(name);
+                var deckWithoutCard = cardsInDeck.RemoveCardName(other);
                 var newSmallWorldAnalyzer = deckWithoutCard.CreateSmallWorldAnalyzer();
 
-                if (newSmallWorldAnalyzer.HasBridge(name, search))
+                if (newSmallWorldAnalyzer.HasBridge(other, search))
                 {
                     return true;
                 }

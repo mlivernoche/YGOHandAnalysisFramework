@@ -9,8 +9,6 @@ public static class CardGroup
         {
             Name = name,
             Size = size,
-            Minimum = minimum,
-            Maximum = maximum,
         };
     }
 
@@ -22,8 +20,6 @@ public static class CardGroup
         {
             Name = cardGroup.Name,
             Size = cardGroup.Size,
-            Minimum = cardGroup.Minimum,
-            Maximum = cardGroup.Maximum,
         };
     }
 }
@@ -33,8 +29,6 @@ public class CardGroup<TCardGroupName> : ICardGroup<CardGroup<TCardGroupName>, T
 {
     public required TCardGroupName Name { get; init; }
     public required int Size { get; init; }
-    public required int Minimum { get; init; }
-    public required int Maximum { get; init; }
 
     public CardGroup() { }
 
@@ -49,8 +43,6 @@ public class CardGroup<TCardGroupName> : ICardGroup<CardGroup<TCardGroupName>, T
         {
             Name = Name,
             Size = newSize,
-            Minimum = System.Math.Min(newSize, Minimum),
-            Maximum = System.Math.Min(newSize, Maximum),
         };
     }
 }

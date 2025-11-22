@@ -6,25 +6,6 @@ namespace YGOHandAnalysisFramework.Data.Operations;
 
 public static class Transform
 {
-
-    /// <summary>
-    /// Get all the cards in <paramref name="cards"/> with a Size greater than 0.
-    /// </summary>
-    /// <returns>All cards present in <paramref name="cards"/> with a Size greater than 0.</returns>
-    public static IEnumerable<HandElement<TCardGroupName>> GetCardsInHand<TCardGroupName>(this HandCombination<TCardGroupName> cards)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var element in cards.CardNames)
-        {
-            if (element.MinimumSize == 0)
-            {
-                continue;
-            }
-
-            yield return element;
-        }
-    }
-
     /// <summary>
     /// Get all the cards in <paramref name="cards"/> with a Size greater than 0, but return the original <typeparamref name="TCardGroup"/>.
     /// This is useful for getting data about the card (e.g., attack, defense, other properties, etc.).
@@ -35,32 +16,19 @@ public static class Transform
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var element in cards.CardNames)
+        foreach (var (amount, card) in cards)
         {
-            if (element.MinimumSize == 0)
+            if (amount == 0)
             {
                 continue;
             }
 
-            if (!analyzer.CardGroups.TryGetValue(element.HandName, out var group))
+            if (!analyzer.CardGroups.TryGetValue(card, out var group))
             {
-                throw new Exception($"Card in hand \"{element.HandName}\" not in card list.");
+                throw new Exception($"Card in hand \"{card}\" not in card list.");
             }
 
             yield return group;
-        }
-    }
-
-    public static IEnumerable<(TCardGroup, HandElement<TCardGroupName>)> GetCardGroups<TCardGroup, TCardGroupName>(this HandAnalyzer<TCardGroup, TCardGroupName> analyzer, HandCombination<TCardGroupName> hand)
-        where TCardGroup : ICardGroup<TCardGroupName>
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var card in hand.GetCardsInHand())
-        {
-            if (analyzer.CardGroups.TryGetValue(card.HandName, out var cardGroup))
-            {
-                yield return (cardGroup, card);
-            }
         }
     }
 
@@ -77,8 +45,6 @@ public static class Transform
             {
                 Name = miscCardGroupName,
                 Size = size,
-                Minimum = min,
-                Maximum = max,
             };
         });
     }
@@ -92,8 +58,6 @@ public static class Transform
             {
                 Name = miscCardGroupName,
                 Size = size,
-                Minimum = min,
-                Maximum = max,
             };
         });
     }
