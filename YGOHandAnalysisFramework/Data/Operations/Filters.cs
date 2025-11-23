@@ -31,7 +31,7 @@ public static class Filters
     {
         var duplicateFound = false;
 
-        foreach(var (amount, _) in hand)
+        foreach(var (_, amount) in hand)
         {
             if(amount > 1)
             {
@@ -50,7 +50,7 @@ public static class Filters
     public static bool HasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> hand)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach(var (amount, _) in hand)
+        foreach(var (_, amount) in hand)
         {
             if(amount > 1)
             {
@@ -72,7 +72,7 @@ public static class Filters
         var singleFound = false;
         var duplicateFound = false;
 
-        foreach(var (amount, _) in hand)
+        foreach(var (_, amount) in hand)
         {
             if(amount == 1)
             {
@@ -99,7 +99,7 @@ public static class Filters
     public static bool HasThisCard<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var (amount, name) in hand)
+        foreach (var (name, amount) in hand)
         {
             if (name.Equals(cardName))
             {
@@ -119,13 +119,8 @@ public static class Filters
     {
         IReadOnlySet<TCardGroupName> cardNamesSet = cardNames is IReadOnlySet<TCardGroupName> set ? set : cardNames.ToHashSet();
 
-        foreach (var (amount, name) in hand)
+        foreach (var (name, _) in hand.GetCardsInHand())
         {
-            if(amount == 0)
-            {
-                continue;
-            }
-
             if (cardNamesSet.Contains(name))
             {
                 return true;
@@ -146,13 +141,8 @@ public static class Filters
     public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, params ReadOnlySpan<TCardGroupName> cardNames)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach(var (amount, name) in hand)
+        foreach(var (name, _) in hand.GetCardsInHand())
         {
-            if(amount == 0)
-            {
-                continue;
-            }
-
             foreach(var cardSearch in cardNames)
             {
                 if(cardSearch.Equals(name))
@@ -207,13 +197,8 @@ public static class Filters
     public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach(var (amount, name) in hand)
+        foreach(var (name, amount) in hand.GetCardsInHand())
         {
-            if(amount == 0)
-            {
-                continue;
-            }
-
             if(!name.Equals(cardName))
             {
                 continue;

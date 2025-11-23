@@ -118,7 +118,7 @@ public static class CardList
     {
         var dict = new DictionaryWithGeneratedKeys<TCardGroupName, TCardGroup>(static group => group.Name, cardList);
 
-        foreach (var (amount, cardName) in hand)
+        foreach (var (cardName, amount) in hand)
         {
             Guard.IsTrue(dict.TryGetValue(cardName, out var card));
 

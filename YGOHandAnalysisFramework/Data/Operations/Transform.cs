@@ -16,13 +16,8 @@ public static class Transform
         where TCardGroup : ICardGroup<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        foreach (var (amount, card) in cards)
+        foreach (var (card, _) in cards.GetCardsInHand())
         {
-            if (amount == 0)
-            {
-                continue;
-            }
-
             if (!analyzer.CardGroups.TryGetValue(card, out var group))
             {
                 throw new Exception($"Card in hand \"{card}\" not in card list.");

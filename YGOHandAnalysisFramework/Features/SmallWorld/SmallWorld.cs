@@ -22,7 +22,7 @@ public static class SmallWorld
             .RemoveHand(hand)
             .CreateSmallWorldAnalyzer();
 
-        foreach (var name in hand.GetCardsInHand())
+        foreach (var (name, _) in hand.GetCardsInHand())
         {
             if (smallWorldAnalyzer.HasBridge(name, search))
             {
@@ -47,7 +47,7 @@ public static class SmallWorld
             .RemoveHand(hand);
         var smallWorldAnalyzer = cardsInDeck.CreateSmallWorldAnalyzer();
 
-        foreach (var name in hand.GetCardsInHand())
+        foreach (var (name, _) in hand.GetCardsInHand())
         {
             if (smallWorldAnalyzer.HasBridge(name, search))
             {
