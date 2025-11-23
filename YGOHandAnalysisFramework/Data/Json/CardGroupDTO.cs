@@ -4,8 +4,6 @@ public class CardGroupDTO
 {
     public string Name { get; set; } = string.Empty;
     public int Size { get; set; }
-    public int Minimum { get; set; }
-    public int Maximum { get; set; }
 
     public static CardGroupDTO Create<TCardGroupName>(ICardGroup<TCardGroupName> cardGroup, Func<TCardGroupName, string> nameConverter)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
