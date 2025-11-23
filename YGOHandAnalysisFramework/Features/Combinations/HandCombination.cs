@@ -15,13 +15,18 @@ public readonly struct HandCombination<TCardGroupName> : IEquatable<HandCombinat
         CardNames = cards;
     }
 
-    public readonly IEnumerable<TCardGroupName> GetCardsInHand()
+    /// <summary>
+    /// Returns an enumerable collection of card groups and their counts that are currently in hand.
+    /// </summary>
+    /// <returns>An enumerable collection of tuples, each containing a card group name and the number of cards of that group in
+    /// hand. Only card groups with a count greater than zero are included.</returns>
+    public readonly IEnumerable<(TCardGroupName CardName, int Amount)> GetCardsInHand()
     {
-        foreach(var (amount, card) in this)
+        foreach(var (card, amount) in this)
         {
             if(amount > 0)
             {
-                yield return card;
+                yield return (card, amount);
             }
         }
     }
@@ -62,7 +67,7 @@ public readonly struct HandCombination<TCardGroupName> : IEquatable<HandCombinat
         private readonly ReadOnlyMemory<byte> _hand;
         private readonly IReadOnlyList<TCardGroupName> _deck;
 
-        public readonly (int Amount, TCardGroupName CardName) Current => (_hand.Span[_index], _deck[_index]);
+        public readonly (TCardGroupName CardName, int Amount) Current => (_deck[_index], _hand.Span[_index]);
 
         public Enumerator(HandCombination<TCardGroupName> handCombination)
         {

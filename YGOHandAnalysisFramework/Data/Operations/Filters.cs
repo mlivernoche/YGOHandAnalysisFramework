@@ -22,244 +22,273 @@ public static class Filters
         return group.Size > 0;
     }
 
-    /// <summary>
-    /// Check whether <paramref name="hand"/> is only contained of unique <typeparamref name="TCardGroupName"/> card names (all no singles, no duplicates).
-    /// </summary>
-    /// <returns>True if <paramref name="hand"/> only has unique cards, otherwise false.</returns>
-    public static bool OnlyHasSingles<TCardGroupName>(this HandCombination<TCardGroupName> hand)
+    extension<TCardGroupName>(HandCombination<TCardGroupName> hand)
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
     {
-        var duplicateFound = false;
-
-        foreach(var (amount, _) in hand)
+        /// <summary>
+        /// Gets a value indicating whether the hand contains only single cards, with no duplicates.
+        /// </summary>
+        public bool OnlyHasSingles
         {
-            if(amount > 1)
+            get
             {
-                duplicateFound = true;
-                break;
-            }
-        }
+                var duplicateFound = false;
 
-        return duplicateFound;
-    }
-
-    /// <summary>
-    /// Checks whether <paramref name="hand"/> has at least one set of duplicate <typeparamref name="TCardGroupName"/> card names (can be a pair or a trio).
-    /// </summary>
-    /// <returns>True if <paramref name="hand"/> has at least one set of duplicate <typeparamref name="TCardGroupName"/> card names, otherwise false.</returns>
-    public static bool HasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> hand)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach(var (amount, _) in hand)
-        {
-            if(amount > 1)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Checks whether <paramref name="cards"/> is ONLY composed of duplicate <typeparamref name="TCardGroupName"/> card names (these can be pairs, but also trios).
-    /// e.g. a hand like 3x "Card A" and 2x "Card B" would return TRUE.
-    /// </summary>
-    /// <returns>True if <paramref name="cards"/> is ONLY composted of duplicate <typeparamref name="TCardGroupName"/> card names, otherwise false.</returns>
-    public static bool OnlyHasDuplicates<TCardGroupName>(this HandCombination<TCardGroupName> hand)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var singleFound = false;
-        var duplicateFound = false;
-
-        foreach(var (amount, _) in hand)
-        {
-            if(amount == 1)
-            {
-                singleFound = true;
-            }
-            else if(amount > 1)
-            {
-                duplicateFound = true;
-            }
-
-            if(singleFound && duplicateFound)
-            {
-                break;
-            }
-        }
-
-        return !singleFound && duplicateFound;
-    }
-
-    /// <summary>
-    /// Check whether <paramref name="cardName"/> is present in the <paramref name="hand"/>.
-    /// </summary>
-    /// <returns>True if <paramref name="cardName"/> is in <paramref name="hand"/>, otherwise false.</returns>
-    public static bool HasThisCard<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var (amount, name) in hand)
-        {
-            if (name.Equals(cardName))
-            {
-                return amount > 0;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Checks whether ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
-    /// </summary>
-    /// <returns>True if ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>, otherwise false.</returns>
-    public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        IReadOnlySet<TCardGroupName> cardNamesSet = cardNames is IReadOnlySet<TCardGroupName> set ? set : cardNames.ToHashSet();
-
-        foreach (var (amount, name) in hand)
-        {
-            if(amount == 0)
-            {
-                continue;
-            }
-
-            if (cardNamesSet.Contains(name))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Checks whether ANY of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
-    /// </summary>
-    /// <remarks>This method uses <c>params ReadOnlySpan&lt;&gt;</c>, <see href="https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/#params-collections">which can be better optimized by .NET</see>.</remarks>
-    /// <typeparam name="TCardGroupName">The card name type.</typeparam>
-    /// <param name="hand">The hand being checked for cards in <paramref name="cardNames"/>.</param>
-    /// <param name="cardNames">The card names being checked in <paramref name="hand"/>.</param>
-    /// <returns>True if ANY of the cards in <paramref name="cardNames"/> are in present in <paramref name="hand"/>, otherwise false.</returns>
-    public static bool HasAnyOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, params ReadOnlySpan<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach(var (amount, name) in hand)
-        {
-            if(amount == 0)
-            {
-                continue;
-            }
-
-            foreach(var cardSearch in cardNames)
-            {
-                if(cardSearch.Equals(name))
+                foreach (var (_, amount) in hand)
                 {
-                    return true;
+                    if (amount > 1)
+                    {
+                        duplicateFound = true;
+                        break;
+                    }
                 }
+
+                return duplicateFound;
             }
         }
 
-        return false;
-    }
-
-    /// <summary>
-    /// Checks whether ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>.
-    /// </summary>
-    /// <returns>True if ALL of the card names in <paramref name="cardNames"/> are present in <paramref name="hand"/>, otherwise false.</returns>
-    public static bool HasAllOfTheseCards<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach (var included in cardNames)
+        /// <summary>
+        /// Gets a value indicating whether the hand contains any duplicate items.
+        /// </summary>
+        public bool HasDuplicates
         {
-            if (!hand.HasThisCard(included))
+            get
             {
+                foreach (var (_, amount) in hand)
+                {
+                    if (amount > 1)
+                    {
+                        return true;
+                    }
+                }
+
                 return false;
             }
         }
 
-        return true;
-    }
-
-    /// <summary>
-    /// Counts the amount of unique card names in <paramref name="hand"/>
-    /// </summary>
-    /// <returns>The amount of unique card names in <paramref name="hand"/>.</returns>
-    public static int CountCardNames<TCardGroupName>(this HandCombination<TCardGroupName> hand)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var count = 0;
-
-        foreach (var card in hand.GetCardsInHand())
+        /// <summary>
+        /// Gets a value indicating whether all items in the hand are present only as duplicates, with no single
+        /// occurrences.
+        /// </summary>
+        /// <remarks>Use this property to determine if the hand contains only items that appear more than
+        /// once, and no items that appear exactly once. This can be useful for identifying hands composed exclusively
+        /// of pairs, triples, or higher multiples.</remarks>
+        public bool OnlyHasDuplicates
         {
-            count++;
+            get
+            {
+                var singleFound = false;
+                var duplicateFound = false;
+
+                foreach (var (_, amount) in hand)
+                {
+                    if (amount == 1)
+                    {
+                        singleFound = true;
+                    }
+                    else if (amount > 1)
+                    {
+                        duplicateFound = true;
+                    }
+
+                    if (singleFound && duplicateFound)
+                    {
+                        break;
+                    }
+                }
+
+                return !singleFound && duplicateFound;
+            }
         }
 
-        return count;
-    }
-
-    /// <summary>
-    /// Counts the amount of copies of <paramref name="cardName"/> in <paramref name="hand"/>.
-    /// </summary>
-    /// <returns>The amount of copies of <paramref name="cardName"/> in <paramref name="hand"/>.</returns>
-    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, TCardGroupName cardName)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        foreach(var (amount, name) in hand)
+        /// <summary>
+        /// Determines whether the hand contains at least one card of the specified card group.
+        /// </summary>
+        /// <param name="cardName">The name of the card group to check for in the hand.</param>
+        /// <returns>true if the hand contains one or more cards of the specified group; otherwise, false.</returns>
+        public bool HasThisCard(TCardGroupName cardName)
         {
-            if(amount == 0)
+            foreach (var (name, amount) in hand)
             {
-                continue;
+                if (name.Equals(cardName))
+                {
+                    return amount > 0;
+                }
             }
 
-            if(!name.Equals(cardName))
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the hand contains at least one card with a name from the specified collection.
+        /// </summary>
+        /// <param name="cardNames">A collection of card group names to check for in the hand. Cannot be null.</param>
+        /// <returns>true if the hand contains at least one card whose name is in the specified collection; otherwise, false.</returns>
+        public bool HasAnyOfTheseCards(IEnumerable<TCardGroupName> cardNames)
+        {
+            IReadOnlySet<TCardGroupName> cardNamesSet = cardNames is IReadOnlySet<TCardGroupName> set ? set : cardNames.ToHashSet();
+
+            foreach (var (name, amount) in hand)
             {
-                continue;
+                if(amount == 0)
+                {
+                    continue;
+                }
+
+                if (cardNamesSet.Contains(name))
+                {
+                    return true;
+                }
             }
 
-            return amount;
+            return false;
         }
 
-        return 0;
+        /// <summary>
+        /// Determines whether the hand contains at least one card with a name matching any of the specified card names.
+        /// </summary>
+        /// <param name="cardNames">A set of card names to search for in the hand. Each element represents a card name to match. The method
+        /// returns true if any card in the hand has a name equal to one of these values.</param>
+        /// <returns>true if the hand contains at least one card with a name matching any of the specified card names; otherwise,
+        /// false.</returns>
+        public bool HasAnyOfTheseCards(params ReadOnlySpan<TCardGroupName> cardNames)
+        {
+            foreach (var (name, amount) in hand)
+            {
+                if(amount == 0)
+                {
+                    continue;
+                }
+
+                foreach (var cardSearch in cardNames)
+                {
+                    if (cardSearch.Equals(name))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the hand contains all of the specified card group names.
+        /// </summary>
+        /// <param name="cardNames">A collection of card group names to check for presence in the hand. Cannot be null.</param>
+        /// <returns>true if the hand contains every card group name in the specified collection; otherwise, false.</returns>
+        public bool HasAllOfTheseCards(IEnumerable<TCardGroupName> cardNames)
+        {
+            foreach (var included in cardNames)
+            {
+                if (!hand.HasThisCard(included))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the number of distinct card names in the hand that have a nonzero amount.
+        /// </summary>
+        public int NumberOfCardNames
+        {
+            get
+            {
+                var count = 0;
+
+                foreach (var (_, amount) in hand)
+                {
+                    if (amount == 0)
+                    {
+                        continue;
+                    }
+
+                    count++;
+                }
+
+                return count;
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of copies of the specified card currently in the hand.
+        /// </summary>
+        /// <param name="cardName">The name of the card to count. Must not be null.</param>
+        /// <returns>The number of copies of the specified card in the hand. Returns 0 if the card is not present.</returns>
+        public int CountCopiesOfCardInHand(TCardGroupName cardName)
+        {
+            foreach (var (name, amount) in hand)
+            {
+                if(amount == 0)
+                {
+                    continue;
+                }
+
+                if (!name.Equals(cardName))
+                {
+                    continue;
+                }
+
+                return amount;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Calculates the total number of cards in the hand that match any of the specified card names.
+        /// </summary>
+        /// <param name="cardNames">A collection of card names to count in the hand. Each name in the collection is counted separately. Cannot
+        /// be null.</param>
+        /// <returns>The total number of cards in the hand that match any of the specified card names. Returns 0 if none of the
+        /// specified cards are present.</returns>
+        public int CountCopiesOfCardInHand(IEnumerable<TCardGroupName> cardNames)
+        {
+            var total = 0;
+
+            foreach (var card in cardNames)
+            {
+                total += hand.CountCopiesOfCardInHand(card);
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// Counts the total number of cards in the hand that match any of the specified card names.
+        /// </summary>
+        /// <param name="cardNames">A parameter array of card names to search for in the hand. Each element specifies a card name to count.
+        /// Cannot be empty.</param>
+        /// <returns>The total number of cards in the hand that match any of the specified card names. Returns 0 if none of the
+        /// specified card names are present.</returns>
+        public int CountCopiesOfCardInHand(params ReadOnlySpan<TCardGroupName> cardNames)
+        {
+            var total = 0;
+
+            foreach (var card in cardNames)
+            {
+                total += hand.CountCopiesOfCardInHand(card);
+            }
+
+            return total;
+        }
     }
 
     /// <summary>
-    /// Counts the total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.
+    /// Filters a sequence of cards, returning only those whose names exist as keys in the specified dictionary.
     /// </summary>
-    /// <returns>The total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.</returns>
-    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, IEnumerable<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var total = 0;
-
-        foreach(var card in cardNames)
-        {
-            total += hand.CountCopiesOfCardInHand(card);
-        }
-
-        return total;
-    }
-
-    /// <summary>
-    /// Counts the total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.
-    /// </summary>
-    /// <remarks>This method uses <c>params ReadOnlySpan&lt;&gt;</c>, <see href="https://devblogs.microsoft.com/dotnet/csharp13-calling-methods-is-easier-and-faster/#params-collections">which can be better optimized by .NET</see>.</remarks>
-    /// <returns>The total amount of all card in <paramref name="cardNames"/> present in <paramref name="hand"/>.</returns>
-    public static int CountCopiesOfCardInHand<TCardGroupName>(this HandCombination<TCardGroupName> hand, params ReadOnlySpan<TCardGroupName> cardNames)
-        where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
-    {
-        var total = 0;
-
-        foreach (var card in cardNames)
-        {
-            total += hand.CountCopiesOfCardInHand(card);
-        }
-
-        return total;
-    }
-
+    /// <remarks>The order of the returned cards matches the order of the input sequence. No values from the
+    /// dictionary are used; only the presence of the key is checked.</remarks>
+    /// <typeparam name="TCard">The type of card to filter. Must implement INamedCard&lt;TCardGroupName&gt;.</typeparam>
+    /// <typeparam name="TCardGroupName">The type used as the key for card names. Must be non-null, equatable, and comparable.</typeparam>
+    /// <typeparam name="TValue">The type of values stored in the dictionary for each card group name.</typeparam>
+    /// <param name="cards">A read-only dictionary containing card group names as keys. Only cards whose names are present as keys in this
+    /// dictionary will be included in the result.</param>
+    /// <param name="names">A sequence of cards to filter based on their names.</param>
+    /// <returns>An enumerable collection of cards from the input sequence whose names are present as keys in the dictionary.</returns>
     public static IEnumerable<TCard> FilterByName<TCard, TCardGroupName, TValue>(this IReadOnlyDictionary<TCardGroupName, TValue> cards, IEnumerable<TCard> names)
         where TCard : INamedCard<TCardGroupName>
         where TCardGroupName : notnull, IEquatable<TCardGroupName>, IComparable<TCardGroupName>
@@ -273,6 +302,16 @@ public static class Filters
         }
     }
 
+    /// <summary>
+    /// Returns a sequence of values from the dictionary whose keys match the specified names.
+    /// </summary>
+    /// <typeparam name="T">The type of the values in the dictionary.</typeparam>
+    /// <typeparam name="U">The type of the keys used to identify values in the dictionary.</typeparam>
+    /// <param name="cards">The dictionary containing values to filter, keyed by name.</param>
+    /// <param name="names">The collection of keys to match against the dictionary.</param>
+    /// <returns>An enumerable collection of values from the dictionary whose keys are present in <paramref name="names"/>. The
+    /// order of the returned values corresponds to the order of the keys in <paramref name="names"/>. If a key is not
+    /// found in the dictionary, it is skipped.</returns>
     public static IEnumerable<T> FilterByName<T, U>(this IReadOnlyDictionary<U, T> cards, IEnumerable<U> names)
     {
         foreach (var cardName in names)

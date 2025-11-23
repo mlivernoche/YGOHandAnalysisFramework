@@ -92,6 +92,7 @@ public class ProsperityProject<TCardGroup, TCardGroupName> : IProject<TCardGroup
 
             var targets = hand
                 .GetCardsInHand()
+                .Select(static card => card.CardName)
                 .ToImmutableHashSet();
             targets = prosperityTargets.Except(targets);
 
